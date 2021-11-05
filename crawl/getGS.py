@@ -94,10 +94,8 @@ def crawl(result):
     for MOD in range(0,2):
         if MOD==0:
             checkClickable(driver,'ID', 3, 'ONE_TO_ONE').click()
-            # print('1+1 파싱중')
         else:
             checkClickable(driver,'ID', 3, 'TWO_TO_ONE').click()
-            # print('2+1 파싱중')
         #1. 각 버튼별 변수 지정
         #start: 맨 처음으로 돌아가는 버튼 / prev: 한 단계 이전으로 /next: 한 단계 다음으로 / end: 맨 끝으로 가는 버튼 / btn_on: 현재 활성화되어있는 페이지 번호
         start=f'//*[@id="contents"]/div[2]/div[3]/div/div/div[{MOD+1}]/div/a[1]';prev=f'//*[@id="contents"]/div[2]/div[{MOD+1}]/div/div/div[4]/div/a[2]'
