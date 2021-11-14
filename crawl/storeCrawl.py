@@ -18,52 +18,61 @@ def main():
     for proc in procs:
         proc.join()
     return result
+def handleResult(result):
+    save_data(result)
 def handleError(error):
     with open('error.pkl','wb') as f:
         pickle.dump(error,f)
-
 def save_data(dic):
-    reset_id = "ALTER TABLE products AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE products SET prod_id = @COUNT:=@COUNT+1;"
-    conn={"host" : "146.56.168.221",
+    reset_idp = "ALTER TABLE products AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE products SET prod_id = @COUNT:=@COUNT+1;"
+    reset_ids = "ALTER TABLE sales AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE sales SET sal_id = @COUNT:=@COUNT+1;"
+    data={"host" : "146.56.168.221",
     "port" : 3306,
     "database" : "sampleDB",
     "user" : ID,
     "password" : PW,
     "client_flag": CLIENT.MULTI_STATEMENTS}
-    table=['products','sales']
-    columns=[["('prod_name','prod_img','prod_price','prod_category')"],["('store','saletype','prod_id')"]]
-    # for i in dic:
+    #sql과 통신하는 부분
+    conn= pymysql.connect(**data)
+    try:
+        with conn.cursor() as curs:
+                curs.execute(reset_idp)
+                curs.execute(reset_ids)
+        for i in range(0,len(dic)):
+            for k in dic[i]:
+                id_get=0
+                # INSERT (물품을 넣음)
+                with conn.cursor() as curs:
+                    prod_sql = "INSERT INTO products(prod_name,prod_img,prod_price,prod_category) values(%s,%s, %s, %s) ON DUPLICATE KEY UPDATE prod_img = %s,prod_price= %s"
+                    curs.execute(prod_sql, (k['name'],k['image'],int(k['price']),k['category'],k['image'],int(k['price'])))
+                
+                conn.commit()
+            
+                # SELECT(물품의 아이디를 검색함)
+                with conn.cursor() as curs:
+                    sql = "select prod_id FROM products where prod_name = %s"
+                    curs.execute(sql,k['name'])
+                    rs = curs.fetchall()
+                    id_get=int(rs[0][0]) #얻은 아이디 
+                    
+                # INSERT (물품을 sale테이블에 연관시킴)
+                with conn.cursor() as curs:
+                    sql = "insert into sales(store,prod_id,saletype) values(%s,%s,%s) ON DUPLICATE KEY UPDATE saletype= %s,prod_id=%s"
+                    curs.execute(sql,(k['store'],id_get,k['type'],k['type'],id_get))
+                        
+                conn.commit()
         
-    
-    
-    # insert=f"INSERT INTO {table}{columns} VALUES()"
+    finally:
+            conn.close()
 
-    # with pymysql.connect(**conn) as con:
-    #     for i in array:
-
-    #     query="INSERT INTO products(prod_name,prod_);"
-    #     cur = con.cursor()
-    #     cur.execute()
-    #     con.commit()
-
-    #select 문
-    # query = 'SELECT * from products'
-    # cursor.execute(query)
-    # rows=cursor.fetchall()
-    # print(rows)
-   
+ 
 if __name__ == '__main__':
     fs()
     A=main()
     result=[A['GS'][0],A['CU'][0]]
     error=[A['GS'][1],A['CU'][1]]
-    with open('result.pkl','wb') as fr:
-        pickle.dump(result,fr)
-    with open('error.pkl','wb') as fe:
-        pickle.dump(error,fe)
-    
-   
-    # with open('error.pkl','rb') as f:
-    #     error = pickle.load(f)
-    # print(len(error[1]))
+    handleResult(result)
+    handleError(error)
+
+
    

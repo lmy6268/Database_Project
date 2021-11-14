@@ -109,6 +109,6 @@ if __name__=='__main__':
     # k=crawl(k)
     # print(k)
     with open('result.pkl','rb') as f:
-        error = pickle.load(f)
-    print(error['GS'])
+        result = pickle.load(f)
+    print(result[0])
    

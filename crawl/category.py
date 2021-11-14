@@ -64,8 +64,6 @@ def search(input,c):
 		else:
 			return cat
 	
-if __name__ =="__main__":
-	print(search("땅콩크림라떼", c=0))
 			
 		
 	
