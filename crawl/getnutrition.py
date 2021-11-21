@@ -108,11 +108,11 @@ def initialize(): #초기화
     os.remove(path+"/DB.csv")
     #결과파일 출력
     df.to_csv(file2,index=False, encoding="utf-8-sig")
-    
 def main(text):#검사할 문장을 인자로 받아온다
+    global ID
     if not os.path.isfile(file2) :
         initialize()
-        return main()
+        return main(text)
     else:
         start_t=time.time()
         df=pd.read_csv(file2)
@@ -130,12 +130,13 @@ def main(text):#검사할 문장을 인자로 받아온다
                 if cur_score>=0.8:
                     m=[cur_score,data,i]
                     break
-                if count>100:
+                if count>1000:
                     break
                 if cur_score>=0.7:
                     if len(m)==0:
                         m=[cur_score,data,i]
                         check=True
+                        ID=i
                     elif cur_score>m[0]:  #유사도 측정
                         m=[cur_score,data,i]
                         check=True
