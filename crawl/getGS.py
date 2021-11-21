@@ -11,7 +11,7 @@ import time
 from lxml.html import fromstring,tostring
 from tqdm import tqdm
 #외부 파이썬 파일 import  
-import getCU as cu
+import storeCrawl as sc
 
 # 함수 정의
 def checkLocated(driver,time,type,text):
@@ -63,9 +63,7 @@ def parseData(MOD,driver,error):
             tmp['type']=parser.xpath(f"{contentPath}/div/div/p/span")[0].text
             tmp['store']="지에스25(GS25)"
             #카테고리
-        
-            tmp=cu.get_cat(tmp)
-            
+            tmp=sc.get_cat(tmp)
             if tmp.get('category')!=None:
                 res.append(tmp)
             else:

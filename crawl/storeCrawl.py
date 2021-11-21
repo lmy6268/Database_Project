@@ -3,9 +3,15 @@ from multiprocessing import Process,Manager,freeze_support as fs
 import os
 import pickle #에러난 리스트를 저장함.
 import pymysql;from pymysql.constants import CLIENT
-file=open(f'{os.getcwd()}\m.txt','r')
+
+#필요한 데이터 목록
+path=os.path.dirname(os.path.realpath(__file__))
+file=open(f'{path}\m.txt','r')
 r=file.readlines()
 ID=r[3].strip('\n');PW=r[4].strip('\n')
+c=0  #api호출 시 1분당 10개의 전송밖에 허용하지 않아서
+
+#메소드 목록
 def main():
     procs = []
     result=Manager().dict() #결과값을 저장하는 리스트
@@ -64,7 +70,43 @@ def save_data(dic):
         
     finally:
             conn.close()
-
+def get_cat(tmp):
+    global c
+    
+    if ")" in tmp['name']:
+        a=tmp['name'].split(')',1)
+    else:
+        a=["",tmp['name']]
+    
+    ty=[f"{a[0]+' '+a[1]}",a[1]]
+    trash=['입','G','g','L','㎖','ML']
+    size=['소','중','대','/']
+    for K in ty:
+        keyword=K
+        if '(' in keyword:
+            keyword=keyword[:keyword.index('(')]
+        if keyword[-1] in trash:
+            keyword=keyword[:-1]
+        for i in range(len(keyword)-1,0,-1):
+            if keyword[i].isdigit():
+                keyword=keyword[:-1]
+            else:
+                break
+        keyword=keyword.strip()
+        if keyword[-1] in size:
+            keyword=keyword[:-1]
+        if keyword[-2:]=='울날':
+            ty.append(keyword[:-2])
+        if c>8:
+            cat=category.search(keyword,c)
+            c=0
+        else:
+            cat=category.search(keyword,c=0)    
+        c+=1
+        if cat!= None: #만약 해당하는 값이 있다면 값을 입력하고 종료함.
+            tmp['category']=cat 
+            return tmp
+    return tmp
  
 if __name__ == '__main__':
     fs()

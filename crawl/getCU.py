@@ -4,45 +4,9 @@ from lxml.html import fromstring,tostring
 import time
 import pickle
 from tqdm import tqdm
-import re ; import os ;import category
-c=0
-def get_cat(tmp):
-    global c
-    if ")" in tmp['name']:
-        a=tmp['name'].split(')',1)
-    else:
-        a=["",tmp['name']]
-    
-    ty=[f"{a[0]+' '+a[1]}",a[1]]
-    trash=['입','G','g','L','㎖','ML']
-    size=['소','중','대','/']
-    for K in ty:
-        keyword=K
-        if '(' in keyword:
-            keyword=keyword[:keyword.index('(')]
-        if keyword[-1] in trash:
-            keyword=keyword[:-1]
-        for i in range(len(keyword)-1,0,-1):
-            if keyword[i].isdigit():
-                keyword=keyword[:-1]
-            else:
-                break
-        keyword=keyword.strip()
-        if keyword[-1] in size:
-            keyword=keyword[:-1]
-        if keyword[-2:]=='울날':
-            ty.append(keyword[:-2])
-        if c>8:
-            cat=category.search(keyword,c)
-            c=0
-        else:
-            cat=category.search(keyword,c=0)    
-        c+=1
-        if cat!= None: #만약 해당하는 값이 있다면 값을 입력하고 종료함.
-            tmp['category']=cat 
-            return tmp
-    return tmp
-
+import re ; import os ;import category;
+import storeCrawl as sc
+path=os.path.dirname(os.path.realpath(__file__))
         
 def crawl(items):
     result=[]
@@ -52,14 +16,13 @@ def crawl(items):
     options=webdriver.ChromeOptions() 
     options.add_argument('window-size=1920x1080')
     options.add_argument('--disable-gpu')
-    options.add_argument('headless')
+    # options.add_argument('headless')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])#이상한 로그 표시 지우기
     #드라이버 설정
-    driver = webdriver.Chrome(f'{os.getcwd()}\chromedriver.exe',options=options)
+    driver = webdriver.Chrome(f'{path}\chromedriver.exe',options=options)
     #URL접속
     driver.get(URL)
     driver.implicitly_wait(3)
- 
     count=1
     # 계속클릭
     
@@ -91,7 +54,7 @@ def crawl(items):
         tmp['price']=text[1][:-1].replace(",","");tmp['image']=i.xpath('.//a/img')[0].get('src')
         tmp['type']=text[2]
         tmp['store']="씨유(CU)"
-        tmp=get_cat(tmp)
+        tmp=sc.get_cat(tmp)
         if tmp.get('category') !=None:
             res.append(tmp)
         else:
@@ -105,10 +68,10 @@ def crawl(items):
     
 if __name__=='__main__':
     # # print(result['CU'][1])
-    # k={}
-    # k=crawl(k)
-    # print(k)
-    with open('result.pkl','rb') as f:
-        result = pickle.load(f)
-    print(result[0])
+    k={}
+    k=crawl(k)
+    print(k)
+    # with open('result.pkl','rb') as f:
+    #     result = pickle.load(f)
+    # print(result[0])
    

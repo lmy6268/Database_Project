@@ -169,4 +169,7 @@ $RECYCLE.BIN/
 *.lnk
 
 #subfile
-m.txt
+*.txt
+*.ppk
+*.key
+.vscode

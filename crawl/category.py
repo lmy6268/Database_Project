@@ -4,19 +4,10 @@ import json
 import os 
 import time
 #정해진 카테고리 분류: 음료 / 아이스크림 / 식품 / 과자 / 생활용품 
-snack=("과자")
-file=open(f'{os.getcwd()}\m.txt','r')
+path=os.path.dirname(os.path.realpath(__file__))
+file=open(f'{path}\m.txt','r')
 r=file.readlines()
 ID=r[0].strip('\n');PW=r[1].strip('\n')
-# cookie=r[2].strip('\n')
-
-# def checkAvailable():
-# 	me = {'cookie': cookie}
-# 	url = requests.get(
-#         'https://developers.naver.com/api/applications/q5_mCT7WPyyPpWp2QN15/usage', headers=me)
-# 	quota = json.loads(url.text)['result'][0]['quota']
-# 	usage = json.loads(url.text)['result'][0]['usage']
-# 	return quota-usage
 
 def search(input,c):
 	
