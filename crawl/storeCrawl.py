@@ -32,7 +32,7 @@ def handleError(error):
 def save_data(dic):
     reset_idp = "ALTER TABLE products AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE products SET prod_id = @COUNT:=@COUNT+1;"
     reset_ids = "ALTER TABLE sales AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE sales SET sal_id = @COUNT:=@COUNT+1;"
-    data={"host" : "146.56.168.221",
+    data={"host" : "193.122.126.186",
     "port" : 3306,
     "database" : "sampleDB",
     "user" : ID,
