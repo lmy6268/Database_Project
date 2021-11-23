@@ -2,7 +2,7 @@
   "name": "app",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "/module/app.js",
   "scripts": {
     "test": "node app.js"
   },
