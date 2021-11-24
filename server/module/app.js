@@ -4,8 +4,13 @@ const express = require('express'); //서버를 여는 모듈
 var db = require('../models');
 var app = express();
 const port=3000;
-app.listen(port, () => {
-    console.log(`${port}포트에서 서버가 실행중입니다`);
+const hostname="10.0.0.226"
+
+
+app.use(express.json());//사용자의 post body를 처리하기 위한 미들웨어
+
+app.listen(port,hostname, () => {
+    console.log(`Server running at https://${hostname}:${port}/`);
 })
 app.get('/', function (req, res) {
     res.send('Hello World!');
@@ -18,6 +23,7 @@ app.get('/', function (req, res) {
 //offset: 몇 번째 페이지
 app.get('/products', (req, res) => {
     var store="";var category=""; var where="";
+    var offset=0 ; var limit=20;
     var flag=false;
     var count=0; var N="";
     if (req.query.store){//상품을 판매하는 곳이 지정된 경우
@@ -36,23 +42,27 @@ app.get('/products', (req, res) => {
         where='where'
     }
     if (count>=2) N='and'; //where절이 길어지는 경우 and가 필요함.
-
-    var query=`Select prod_img, prod_name,prod_price,saletype from products as p join sales as s on s.prod_id=p.prod_id ${where} ${category} ${N} ${store} limit ${Number(req.query.offset)},${Number(req.query.limit)}`;
+    if (req.query.offset)offset=Number(req.query.offset);
+    if (req.query.limit)limit=Number(req.query.limit);
+    var query=`Select prod_img, prod_name,prod_price,saletype from products as p join sales as s on s.prod_id=p.prod_id ${where} ${category} ${N} ${store} limit ${offset},${limit}`;
     //쿼리 실행
     db.sequelize.query(query)
     .then(
         data => res.json(data)).catch(err => console.log(err));
 }) //클라이언트에서  상품 조회
 
+app.get('/nutrition',(req,res)=>{
+    res.send("hello WOrlkd");
+}); //영양 정보를 보여주는 루트
 
 app.post('/signup', (req, res) => {
     var ID=req.body.id; //아이디
     var PW=req.body.pass;//비밀번호, sha2 방식으로 저장됨.
     var EM=req.body.email; //이메일 주소
     var NN=req.body.nn; // 닉네임
-    var query=`INSERT INTO USER VALUES(${ID},${PW},${NN},${EM})`; // 회원가입 쿼리
+    // var query=`INSERT INTO USER VALUES(${ID},${PW},${NN},${EM})`; // 회원가입 쿼리
 
-    res.send('OK');
+    res.send(`OK,got${ID}`);
 }) //클라이언트에서 회원가입 요청
 
 app.post('/login', (req, res) => {
