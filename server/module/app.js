@@ -6,16 +6,20 @@ const express = require('express'); //서버를 여는 모듈
 var db = require('../models');
 var app = express();
 const port = 3000;
-const hostname = "10.0.0.226"
+const hostname = "10.0.0.226" //내부 IP 주소
 
-
-app.use(express.json()); //사용자의 post body를 처리하기 위한 미들웨어
+//사용자의 post body를 처리하기 위한 미들웨어
+app.use(express.json()); 
 app.use(express.urlencoded({
     extended: true
 }))
+
+//서버 개방
 app.listen(port, hostname, () => {
     console.log(`Server running at https://${hostname}:${port}/`);
 })
+
+
 app.get('/', function (req, res) {
     res.send('Hello World!');
 });
