@@ -170,3 +170,5 @@ $RECYCLE.BIN/
 
 #subfile
 m.txt
+.env
+.vscode
