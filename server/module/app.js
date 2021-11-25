@@ -9,7 +9,7 @@ const port = 3000;
 const hostname = "10.0.0.226" //내부 IP 주소
 
 //사용자의 post body를 처리하기 위한 미들웨어
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({
     extended: true
 }))
@@ -36,7 +36,7 @@ app.get('/products', (req, res) => {
     var where = "";
     var offset = 0; //기본값을 0으로 줌
     var limit = 20; //기본값을 20으로 줌
-    var flag = false;//WHERE 표시 유무 체크용
+    var flag = false; //WHERE 표시 유무 체크용
     var count = 0; //AND 표시 유무 체크용
     var N = "";
     //분기문
@@ -44,7 +44,7 @@ app.get('/products', (req, res) => {
         store = `%${req.query.store}%`
         store = `s.store like "${store}"`;
         flag = true;
-        count += 1 
+        count += 1
     }
     if (req.query.cat) { //상품의 카테고리가 지정된 경우
         category = `p.prod_category="${req.query.cat}"`;
@@ -82,9 +82,31 @@ app.post('/signup', (req, res) => {
 
     // var query=`INSERT INTO USER VALUES(${ID},${PW},${NN},${EM})`; // 회원가입 쿼리
     // => 아이디 중복/ 닉네임 중복 쿼리도 작성해야 함.
-    
+
 }) //클라이언트에서 회원가입 요청
 
+app.get('/duplicate', (req, res) => { //중복을 체크하는 쿼리
+var ID = req.query.id_check;
+var Email = req.query.email_check;
+var Nickname = req.query.nickname_check;
+var queryT = "";
+if (ID) {
+    queryT = `user_id=${ID}`
+} else if (Email) {
+    queryT = `user_email=${Email}`
+} else {
+    queryT = `user_name=${Nickname}`;
+}
+var query = `SELECT * from user WHERE ${queryT}`; // 회원정보 조회 쿼리
+db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.SELECT
+    })
+    .then(
+        data => {
+            if (data.length == 0) res.status(403); //데이터가 없는 경우 403 상태코드 리턴(접근 거부)
+            else res.status(200); //데이터가 있는 경우, 200 상태코드 리턴(접근 허가)
+        }).catch(err => console.log(err)); //클라이언트에서 로그인 요청
+});
 app.post('/login', (req, res) => {
     var ID = req.body.id; //아이디
     var PW = req.body.pass; //비밀번호, sha2 방식으로 저장됨.
@@ -94,7 +116,9 @@ app.post('/login', (req, res) => {
         })
         .then(
             data => {
-                if(data.length==0) res.status(403).json("error");//데이터가 없는 경우 403 상태코드 리턴(접근 거부)
+                if (data.length == 0) res.status(403); //데이터가 없는 경우 403 상태코드 리턴(접근 거부)
                 else res.status(200); //데이터가 있는 경우, 200 상태코드 리턴(접근 허가)
             }).catch(err => console.log(err));
 }) //클라이언트에서 로그인 요청
+
+//193.122.126.186:3000/duplicate?id_check==> 값을 표기 => 
