@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import net.daum.mf.map.api.MapPOIItem;
+import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 import java.io.IOException;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private GpsTracker gpsTracker;
     TextView tv_location;
     Button btn_myLocation;
+    MapView mapView;
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
@@ -39,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MapView mapView = new MapView(this);
+        mapView = new MapView(this);
         ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
 
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
             showDialogForLocationServiceSetting();
         }
         tv_location = findViewById(R.id.tv_location);
+        startLocationService();
         btn_myLocation = findViewById(R.id.btn_myLocation);
         btn_myLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,9 +67,21 @@ public class MainActivity extends AppCompatActivity {
         gpsTracker = new GpsTracker(MainActivity.this);
         double latitude = gpsTracker.getLatitude();
         double longitude = gpsTracker.getLongitude();
+//        MapCircle circle1 = new MapCircle(
+//                MapPoint.mapPointWithGeoCoord(latitude, longitude), // center
+//                30, // radius
+//                Color.argb(128, 255, 0, 0), // strokeColor
+//                Color.argb(128, 0, 255, 0) // fillColor
+//        );
+//        circle1.setTag(1234);
+//        mapView.addCircle(circle1);
+        MapPOIItem marker=new MapPOIItem();
+
+        setMarker(marker,MapPoint.mapPointWithGeoCoord(latitude,longitude),1);
+        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude), true);
         String address = getCurrentAddress(latitude, longitude); //주소로 변환
         tv_location.setText(address);
-        Toast.makeText(MainActivity.this, "현재위치 \n위도 " + latitude + "\n경도 " + longitude, Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -219,6 +235,40 @@ public class MainActivity extends AppCompatActivity {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
+    public void setMarker_m(Location[] locations){
+        MapPOIItem marker[] = new MapPOIItem[locations.length];//locations의 개수만큼 마커를 생성
+        MapPoint point[]=new MapPoint[locations.length];
+        for(int i=0;i<locations.length;i++){
+            point[i]=MapPoint.mapPointWithGeoCoord(locations[i].getLat(),locations[i].getLong()); //맵포인트 생성
+        }
+        for(int i=0;i<locations.length;i++) {
+            setMarker(marker[i],point[i],i);
+        }
+    }
+    private void setMarker(MapPOIItem marker,MapPoint point,int i){
+        marker.setItemName("Default Marker"+i);
+        marker.setTag(i);
+        marker.setMapPoint(point);
+        marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+        mapView.addPOIItem(marker);
+    }
+}
 
+
+class Location //위도 경도를 담을 수 있는 클래스
+{
+    double latitude;
+    double longtitude;
+    public Location(double lat,double lgt){
+        this.latitude=lat;
+        this.longtitude=lgt;
+    }
+    public double getLong(){
+        return longtitude;
+    }
+    public double getLat(){
+        return latitude;
+    }
 }
 
