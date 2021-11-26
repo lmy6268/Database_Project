@@ -1,88 +1,245 @@
 package com.example.storesale;
 
+
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 
 
-public class signupFragment extends Fragment {
+public class signupFragment extends Fragment implements View.OnClickListener {
     private EditText edtSPass, edtSPassCheck, edtSemail, edtSid, edtSNickname;
-    private Button btnSProceed;
+    private Button[] btnArray;
+    private int[] idArray = {R.id.btnIdcheck, R.id.btnEmailcheck, R.id.btnNNcheck, R.id.btnSProceed};
     private Context context;
+
 
     public signupFragment() {
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         //initialize
         View i = inflater.inflate(R.layout.fragment_signup, container, false);
+        btnArray = new Button[idArray.length];
+
+
         edtSid = i.findViewById(R.id.edtSid);
         edtSPass = i.findViewById(R.id.edtSPass);
         edtSPassCheck = i.findViewById(R.id.edtSPassCheck);
         edtSemail = i.findViewById(R.id.edtSemail);
         edtSNickname = i.findViewById(R.id.edtSNickname);
-        btnSProceed = i.findViewById(R.id.btnSProceed);
         context = container.getContext();
-        //회원가입 진행 버튼을 클릭하였을 때.
-        btnSProceed.setOnClickListener(v -> {
-            Boolean checkEmpty[] = new Boolean[5];
-            Arrays.fill(checkEmpty, false);
-            String values[] = new String[5];
-            int count = 0;
-            values[0] = edtSid.getText().toString();
-            values[1] = edtSemail.getText().toString();
-            values[2] = edtSNickname.getText().toString();
-            values[3] = edtSPass.getText().toString();
-            values[4] = edtSPassCheck.getText().toString();
-            for (int i1 = 0; i1 < values.length; i1++) {
-                if (values[i1].equals("")) {
-                    checkEmpty[i1] = true;
-                    count++;
-                }
-            }
-            proceedSignup(count, checkEmpty, values);
-        });
+        for (int j = 0; j < idArray.length; j++) {
+            btnArray[j] = i.findViewById(idArray[j]);
+            btnArray[j].setOnClickListener(this);
+
+        }
+
+
         return i;
     }
+
+
+    @Override
+    public void onClick(View view) {
+        Button clickedBtn = (Button) view; // 입력된 버튼 요소값
+        for (int i = 0; i < btnArray.length; i++) {
+            if (btnArray[i] == clickedBtn) {
+                if (i == 3) proceedSignup();
+                else {
+                    try {
+                        checkAccount(i);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+
+        }
+    }
+
+    // private void proceedSignup(int count, Boolean[] checkEmpty, String[] values) {}
+
 
     public void makeToast(String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void checkAccount(String[] array) //회원가입이 가능한지 확인함.
-    {
-        System.out.println(Arrays.toString(array));
-        //서버와의 통신
-        //중복 체크
-        //아이디 중복
-        //이메일 중복
-        //닉네임 중복
 
-        //중복되는 항목이 없다면, 회원가입 진행
-        //쿼리를 보내는 함수를 적용한다.
+
+    public void sendRequest(String URL, int num) throws IOException {
+
+
+        Handler handler = new Handler() {
+            public void handleMessage(Message msg) {
+                String[]keyArray = {"아이디","이메일","닉네임"};
+                Bundle bun = msg.getData();
+                String data = null;
+                String key = "";
+                for( String i: keyArray ){
+                   if (bun.containsKey(i)){
+                       data = bun.getString(i);
+                       key = i;
+                       break;
+
+                   }
+                }
+
+
+                if (data.equals("OK")) {makeToast (String.format("사용가능한 %s입니다",key));}
+                else {makeToast (String.format("중복된 %s입니다",key));}
+
+
+            }
+        };
+
+        new Thread() {
+            public void run() {
+
+                try {
+
+                    URLConnection URLconnection;
+                    URL url = new URL(URL);
+
+                    URLconnection = url.openConnection();
+                    HttpURLConnection httpConnection = (HttpURLConnection) URLconnection;
+
+                    InputStream stream = httpConnection.getErrorStream();
+                    if (stream == null) {
+                        stream = httpConnection.getInputStream();
+                    }
+
+                    try { BufferedReader br = new BufferedReader(new InputStreamReader(stream,  "utf-8"));
+
+                        StringBuilder response = new StringBuilder();
+                        String responseLine = null;
+                        while ((responseLine = br.readLine()) != null) {
+                            response.append(responseLine.trim());
+                        }
+                        Bundle bun = new Bundle();
+                        String key = null;
+                        switch (num)
+                        {
+                            case 0 :
+                                key = "아이디";
+                                break;
+                            case 1 :
+                                key = "이메일";
+                                break;
+                            case 2 :
+                                key = "닉네임";
+                                break;
+
+                        }
+                        bun.putString(key, response.toString()); //키값 과 value
+                        Message msg = handler.obtainMessage();
+                        msg.setData(bun);
+                        handler.sendMessage(msg);} catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+
+                } catch (MalformedURLException malformedURLException) {
+                    malformedURLException.printStackTrace();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+            }
+        }.start();
     }
 
-    private void proceedSignup(int count, Boolean[] checkEmpty, String[] values) //회원가입 루틴
+
+    private void checkAccount(int num) throws IOException //회원가입이 가능한지 확인함.
     {
+
+
+        //서버와의 통신
+        //중복 체크
+        String URL = "";
+
+        if (num == 0) {
+            if (edtSid.getText().toString().equals("")) {
+                makeToast("아이디를 입력해주세요");
+                return;
+            }
+            else URL = String.format("http://193.122.126.186:3000/duplicate?id_check=%s",  edtSid.getText().toString());
+        } else if (num == 1) {
+            if (edtSemail.getText().toString().equals("")){
+                makeToast("이메일를 입력해주세요");
+                return;
+            }
+            else URL = String.format("http://193.122.126.186:3000/duplicate?email_check=%s",edtSemail.getText().toString());
+        } else if (num == 2) {
+            if (edtSNickname.getText().toString().equals("") ){
+                makeToast("닉네임를 입력해주세요");
+                return;
+            }
+            else URL = String.format("http://193.122.126.186:3000/duplicate?nickname_check=%s", edtSNickname.getText().toString());
+        }
+
+        sendRequest(URL, num);
+
+    }
+//이메일 중복
+//닉네임 중복
+
+//중복되는 항목이 없다면, 회원가입 진행
+//쿼리를 보내는 함수를 적용한다.
+
+    private void proceedSignup() //회원가입 루틴
+    {
+        Boolean checkEmpty[] = new Boolean[5];
+        Arrays.fill(checkEmpty, false);
+        String values[] = new String[5];
+        int count = 0;
+        values[0] = edtSid.getText().toString();
+        values[1] = edtSemail.getText().toString();
+        values[2] = edtSNickname.getText().toString();
+        values[3] = edtSPass.getText().toString();
+        values[4] = edtSPassCheck.getText().toString();
+        for (int i1 = 0; i1 < values.length; i1++) {
+            if (values[i1].equals("")) {
+                checkEmpty[i1] = true;
+                count++;
+            }
+        }
+
         if (count == 0) {
             if (values[4].equals(values[3]))//비밀번호 확인과 같은 경우
             {
-                values[3] = ((MainActivity) getActivity()).sha256(values[3]); //암호화 진행
-                checkAccount(values);
+                values[3] = ((MainActivity) getActivity(    )).sha256(values[3]); //암호화 진행
+
                 makeToast("회원가입 성공");
             } else {
                 makeToast("비밀번호 확인이 일치하지 않습니다.");
             }
-        }
-        else if (count == 5) makeToast("정보를 입력하신 후 진행해 주세요.");
+        } else if (count == 5) makeToast("정보를 입력하신 후 진행해 주세요.");
         else {
             for (int i = 0; i < 5; i++) {
                 if (checkEmpty[i]) {
@@ -108,4 +265,6 @@ public class signupFragment extends Fragment {
             }
         }
     }
+
+
 }
