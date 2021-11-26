@@ -8,6 +8,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -24,7 +26,16 @@ import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+    MapPOIItem currLoc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         mapView = new MapView(this);
         ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView);
+        currLoc = new MapPOIItem();
 
         if (checkLocationServicesStatus()) {
             checkRunTimePermission();
@@ -52,36 +65,58 @@ public class MainActivity extends AppCompatActivity {
             showDialogForLocationServiceSetting();
         }
         tv_location = findViewById(R.id.tv_location);
-        startLocationService();
+        try {
+            startLocationService();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         btn_myLocation = findViewById(R.id.btn_myLocation);
         btn_myLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startLocationService();
+                try {
+                    startLocationService();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
 
 
-    public void startLocationService() {
+    class Location //위도 경도를 담을 수 있는 클래스
+    {
+        double latitude;
+        double longtitude;
+
+        public Location(double lat, double lgt) {
+            this.latitude = lat;
+            this.longtitude = lgt;
+        }
+
+        public double getLong() {
+            return longtitude;
+        }
+
+        public double getLat() {
+            return latitude;
+        }
+    }
+
+
+    public void startLocationService() throws IOException {
         gpsTracker = new GpsTracker(MainActivity.this);
         double latitude = gpsTracker.getLatitude();
-        double longitude = gpsTracker.getLongitude();
-//        MapCircle circle1 = new MapCircle(
-//                MapPoint.mapPointWithGeoCoord(latitude, longitude), // center
-//                30, // radius
-//                Color.argb(128, 255, 0, 0), // strokeColor
-//                Color.argb(128, 0, 255, 0) // fillColor
-//        );
-//        circle1.setTag(1234);
-//        mapView.addCircle(circle1);
-        MapPOIItem marker=new MapPOIItem();
-
-        setMarker(marker,MapPoint.mapPointWithGeoCoord(latitude,longitude),1);
-        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude), true);
-        String address = getCurrentAddress(latitude, longitude); //주소로 변환
+        double longtitude = gpsTracker.getLongitude();
+        if (mapView.findPOIItemByTag(0) != null) {
+            mapView.removePOIItem(mapView.findPOIItemByTag(0));
+        }
+        mapView.setZoomLevel(1, true);
+        setMarker(currLoc, MapPoint.mapPointWithGeoCoord(latitude, longtitude), 0);
+        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longtitude), true);
+        String address = getCurrentAddress(latitude, longtitude); //주소로 변환
         tv_location.setText(address);
-
+        setCvsMaker(latitude,longtitude);
     }
 
     @Override
@@ -126,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
     void checkRunTimePermission() {
         //런타임 퍼미션 처리
         // 1. 위치 퍼미션을 가지고 있는지 체크합니다.
@@ -215,7 +251,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         switch (requestCode) {
             case GPS_ENABLE_REQUEST_CODE:
                 //사용자가 GPS 활성 시켰는지 검사
@@ -231,44 +266,84 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean checkLocationServicesStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
-    public void setMarker_m(Location[] locations){
+
+    public void setMarker_cvs(Location[] locations) {
         MapPOIItem marker[] = new MapPOIItem[locations.length];//locations의 개수만큼 마커를 생성
-        MapPoint point[]=new MapPoint[locations.length];
-        for(int i=0;i<locations.length;i++){
-            point[i]=MapPoint.mapPointWithGeoCoord(locations[i].getLat(),locations[i].getLong()); //맵포인트 생성
+        MapPoint point[] = new MapPoint[locations.length];
+        for (int i = 0; i < locations.length; i++) {
+            point[i] = MapPoint.mapPointWithGeoCoord(locations[i].getLat(), locations[i].getLong()); //맵포인트 생성
         }
-        for(int i=0;i<locations.length;i++) {
-            setMarker(marker[i],point[i],i);
+        for (int i = 0; i < locations.length; i++) {
+
+            setMarker(marker[i], point[i], i + 1);
         }
     }
-    private void setMarker(MapPOIItem marker,MapPoint point,int i){
-        marker.setItemName("Default Marker"+i);
+
+    private void setMarker(MapPOIItem marker, MapPoint point, int i) {
+        marker.setItemName("Default Marker" + i);
         marker.setTag(i);
         marker.setMapPoint(point);
         marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
         marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
         mapView.addPOIItem(marker);
     }
-}
 
+    private void setCvsMaker(double x,double y) //서버와 송수신하고, print까지 한다.
+    {
+        Location[] loc=null;
+        Handler handler = new Handler() {
+            public void handleMessage(Message msg) {
+                Bundle bun = msg.getData();
+                String data = bun.getString("HTML_DATA");
+                JSONObject json = null;
+                try {
+                    json = new JSONObject(data);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                loc=new Location[json.length()];
+                System.out.println();
+            }
+        };
 
-class Location //위도 경도를 담을 수 있는 클래스
-{
-    double latitude;
-    double longtitude;
-    public Location(double lat,double lgt){
-        this.latitude=lat;
-        this.longtitude=lgt;
+        new Thread() {
+            public void run() {
+                String result="";
+                try {
+                     result=connection(x,y);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Bundle bun = new Bundle();
+                bun.putString("HTML_DATA", result);
+                Message msg = handler.obtainMessage();
+                msg.setData(bun);
+                handler.sendMessage(msg);
+            }
+        }.start();
+
     }
-    public double getLong(){
-        return longtitude;
-    }
-    public double getLat(){
-        return latitude;
+    private String connection(double x,double y) throws IOException {
+        int findRad = 250;
+        String groupCd = "CS2";
+        String domain = String.format("https://dapi.kakao.com/v2/local/search/category.json?category_group_code=%s&x=%f&y=%f&radius=%d",groupCd,y,x, findRad);
+        URL url = new URL(domain);
+        String key = getResources().getString(R.string.Restkey); //API 키
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("Authorization", String.format("KakaoAK %s", key));
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), "utf-8"))) {
+            StringBuilder response = new StringBuilder();
+            String responseLine = null;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            return response.toString();
+        }
     }
 }
 

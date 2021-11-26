@@ -9,4 +9,6 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="key">631ebe3194b54677056ad86520cac9d5</string>
+    <string name="Restkey">bedff13003465292853552ffa14617a6</string>
 </resources>
