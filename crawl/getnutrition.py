@@ -78,16 +78,17 @@ def initialize(): #초기화
     df=df.drop(drop_list)
     df['지역 / 제조사']=df['지역 / 제조사'].apply(cleanText_B)
     df['식품명']=df['지역 / 제조사']+')'+df['식품명']
-    df=df.drop(df.columns.difference(['식품명','에너지(㎉)','탄수화물(g)','총당류(g)','단백질(g)','지방(g)','총 포화 지방산(g)','콜레스테롤(g)','트랜스 지방산(g)','나트륨(㎎)']),axis=1) #필요한 부분을 제외하고 삭제하는 편이 더 빨라보임.
+    df['1회제공량']=df['1회제공량'].astype(str)+df['내용량_단위']
+    df=df.drop(df.columns.difference(['식품명','1회제공량','에너지(㎉)','탄수화물(g)','총당류(g)','단백질(g)','지방(g)','총 포화 지방산(g)','콜레스테롤(g)','트랜스 지방산(g)','나트륨(㎎)']),axis=1) #필요한 부분을 제외하고 삭제하는 편이 더 빨라보임.
     #데이터 가공
     unit=[]
     column=[]
-    for i in df.columns.tolist()[1:]:
+    for i in df.columns.tolist()[2:]:
         a,b=i.split('(')
         column.append(re.sub(r'[총 ]*','',a))
         unit.append(b.replace(')',''))
     df=df.replace('-',0)
-    df.columns=[df.columns.tolist()[0]]+column
+    df.columns=[df.columns.tolist()[0],df.columns.tolist()[1]]+column
     for c,u in zip(column,unit):
         df[c]=df[c].astype(str)+u
     #중복데이터가 들어가 있음 과거데이터
@@ -107,11 +108,11 @@ def initialize(): #초기화
     os.remove(path+"/DB.csv")
     #결과파일 출력
     df.to_csv(file2,index=False, encoding="utf-8-sig")
-    
 def main(text):#검사할 문장을 인자로 받아온다
+    global ID
     if not os.path.isfile(file2) :
         initialize()
-        return main()
+        return main(text)
     else:
         start_t=time.time()
         df=pd.read_csv(file2)
@@ -129,12 +130,13 @@ def main(text):#검사할 문장을 인자로 받아온다
                 if cur_score>=0.8:
                     m=[cur_score,data,i]
                     break
-                if count>100:
+                if count>1000:
                     break
                 if cur_score>=0.7:
                     if len(m)==0:
                         m=[cur_score,data,i]
                         check=True
+                        ID=i
                     elif cur_score>m[0]:  #유사도 측정
                         m=[cur_score,data,i]
                         check=True
@@ -147,7 +149,6 @@ def main(text):#검사할 문장을 인자로 받아온다
             return None
         else:
             return df.loc[m[-1],:].to_list() 
-
 
 
     

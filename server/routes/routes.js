@@ -68,13 +68,22 @@ router.get('/products', (req, res) => {
 
 //영양 정보를 보여주는 루트
 router.get('/nutrition', (req, res) => {
-    var prodID=req.query.prodID;
-    var query=`Select * from nutrition where prod_id=${prodID}`;
+    //req로 요청받은 값을 처리하는 부분
+    var name =req.query.name;
+    var store=req.query.store;
+    var query=`Select * from (Select prod_id from products)p, nutritions n where p.prod_id=n.prod_id`;
     db.sequelize.query(query, {
         type: db.sequelize.QueryTypes.SELECT
     })
-    .then(
-        data => res.json(data)).catch(err => console.log(err)); 
+    .then( data=>{
+        if(data.length==0){
+            res.status(400);
+            res.send("None");
+        }else{
+            res.status(200);
+            res.json(data)
+        }
+    }).catch(err => console.log(err));
 }); 
 
 
@@ -92,10 +101,9 @@ router.post('/signup', (req, res) => {
     db.sequelize.query(query, {
         type:db.sequelize.QueryTypes.INSERT
     }).then(data=>{
-        res.status(200)
-        res.send("OK");
-    }).catch(err => { res.status(400);
-        res.send("Error");}); //클라이언트에서 로그인 요청
+        res.status(200);
+        res.send("회원가입이 완료되었습니다");
+    });
 
 })
 //중복을 체크하는 쿼리
