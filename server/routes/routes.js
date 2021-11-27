@@ -61,7 +61,19 @@ router.get('/nutrition', (req, res) => {
     //req로 요청받은 값을 처리하는 부분
     var name =req.query.name;
     var store=req.query.store;
-    var query=`Select * from `;
+    var query=`Select * from (Select prod_id from products)p, nutritions n where p.prod_id=n.prod_id`;
+    db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.SELECT
+    })
+    .then( data=>{
+        if(data.length==0){
+            res.status(400);
+            res.send("None");
+        }else{
+            res.status(200);
+            res.json(data)
+        }
+    }).catch(err => console.log(err));
 }); 
 
 
@@ -77,6 +89,7 @@ router.post('/signup', (req, res) => {
     db.sequelize.query(query, {
         type:db.sequelize.QueryTypes.INSERT
     }).then(data=>{
+        res.status(200);
         res.send("회원가입이 완료되었습니다");
     });
 

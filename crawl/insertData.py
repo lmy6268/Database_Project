@@ -27,6 +27,7 @@ conn= pymysql.connect(**data)
 prod_id=[] #상품 테이블의 id
 prod_name=[] #상품 테이블의 상품명
 try:
+    #1번 부분 
     with conn.cursor() as curs:
         sql = "select prod_id,prod_name FROM products where prod_category in('과자','식품','음료')" #데이터들중 식품들만 가져옴
         curs.execute(sql)
@@ -34,21 +35,26 @@ try:
         prod_id=[i[0] for i in rs]
         prod_name=[i[1] for i in rs]
     item=[]
+    #2번 부분
     for i,j in zip(prod_id,prod_name):
         item.append([j,i])
+    
     item=sorted(item)
+    #3번 부분
     for i in item:
         result=gn.main(i[0])
-        print(result)
+        
         if result!=None:
-            i.extend(result)
+            print(i[0],result,result[1:])
+            i.extend(result[1:])
         else:
+            print(i[0],result)
             i.append('None')
-    
+    #4번 부분 
     with conn.cursor() as cur2:
         for i in item:
             if i[-1]!="None":
-                sql=f'Insert into nutritions("kcal","tan","sugar","protein","fat","fofat","transfat","coles","nat","prod_id") values ({i[2]},{i[3]},{i[4]},{i[5]},{i[6]},{i[7]},{i[8]},{i[9]},{i[10]},{i[1]})'
+                sql=f'Insert into nutritions("prod_id","por","kcal","tan","sugar","protein","fat","fofat","transfat","coles","nat") values ({i[1]},{i[2]},{i[3]},{i[4]},{i[5]},{i[6]},{i[7]},{i[8]},{i[9]},{i[10]},{i[11]})'
                 cur.execute(sql)
 finally:
     conn.close()
