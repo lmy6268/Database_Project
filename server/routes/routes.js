@@ -65,7 +65,6 @@ router.get('/products', (req, res) => {
         .then(
             data => res.json(data)).catch(err => console.log(err));
 })
-
 //영양 정보를 보여주는 루트
 router.get('/nutrition', (req, res) => {
     //req로 요청받은 값을 처리하는 부분
@@ -103,7 +102,7 @@ router.post('/signup', (req, res) => {
     }).then(data=>{
         res.status(200);
         res.send("회원가입이 완료되었습니다");
-    });
+    }).catch(err => console.log(err)); //클라이언트에서 로그인 요청
 
 })
 //중복을 체크하는 쿼리
