@@ -5,19 +5,19 @@
     <item
         android:id="@+id/tab_map"
         android:enabled="true"
-        android:icon="@android:drawable/ic_menu_call"
-        android:title="전화"
+        android:icon="@drawable/iconmap"
+        android:title="편의점 위치"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/tab_search"
         android:enabled="true"
-        android:icon="@android:drawable/ic_dialog_email"
-        android:title="메시지"
+        android:icon="@drawable/iconsearch"
+        android:title="검색"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/tab_camera"
+        android:id="@+id/tab_setting"
         android:enabled="true"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="카메라"
+        android:icon="@drawable/iconsettings"
+        android:title="설정"
         app:showAsAction="ifRoom" />
 </menu>
