@@ -10,6 +10,14 @@ router.use(express.urlencoded({
 }))
 
 
+
+//사용자의 post body를 처리하기 위한 미들웨어
+router.use(express.json());
+router.use(express.urlencoded({
+    extended: true
+}))
+
+
 //초기 화면 
 router.get('/', function (req, res) {
     res.send('Hello World!');
@@ -65,12 +73,15 @@ router.get('/products', (req, res) => {
         .then(
             data => res.json(data)).catch(err => console.log(err));
 })
+
 //영양 정보를 보여주는 루트
 router.get('/nutrition', (req, res) => {
     //req로 요청받은 값을 처리하는 부분
     var name =req.query.name;
     var store=req.query.store;
-    var query=`Select * from (Select prod_id from products)p, nutritions n where p.prod_id=n.prod_id`;
+    var query=` Select p.prod_id,por,kcal,tan,sugar,fofat,protein,fat,nat,transfat,coles 
+    from (Select prod_id from products where prod_name="${name}")p, 
+    nutrition n where p.prod_id=n.prod_id `;
     db.sequelize.query(query, {
         type: db.sequelize.QueryTypes.SELECT
     })

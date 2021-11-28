@@ -5,10 +5,8 @@ var app = express();
 const port = 3000;
 const hostname = "10.0.0.226" //내부 IP 주소
 
-app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
+
+
 //서버 개방
 app.listen(port, hostname, () => {
     console.log(`Server running at https://${hostname}:${port}/`);
