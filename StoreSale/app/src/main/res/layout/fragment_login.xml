@@ -33,6 +33,7 @@
                 android:id="@+id/edtLid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:layout_weight="1" />
         </LinearLayout>
 
@@ -49,6 +50,7 @@
 
             <EditText
                 android:id="@+id/edtLpass"
+                android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

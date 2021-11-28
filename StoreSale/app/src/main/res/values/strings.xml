@@ -2,4 +2,6 @@
     <string name="app_name">StoreSale</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="key">631ebe3194b54677056ad86520cac9d5</string>
+    <string name="Restkey">bedff13003465292853552ffa14617a6</string>
 </resources>

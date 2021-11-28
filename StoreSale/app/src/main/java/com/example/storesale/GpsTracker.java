@@ -1,4 +1,4 @@
-package com.example.kakaoapi;
+package com.example.storesale;
 
 import android.Manifest;
 import android.app.Service;
@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.core.content.ContextCompat;
+
 
 
 public class GpsTracker extends Service implements LocationListener {
