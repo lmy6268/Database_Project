@@ -8,14 +8,14 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 
 
-public class searchFragment extends Fragment {
+public class setFragment extends Fragment {
 
-    public searchFragment() {
+    public setFragment() {
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View i = inflater.inflate(R.layout.fragment_search, container, false);
+        View i = inflater.inflate(R.layout.fragment_set, container, false);
 //        i.findViewById(R.id.);
         return i;
     }
