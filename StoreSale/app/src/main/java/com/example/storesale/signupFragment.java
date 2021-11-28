@@ -14,12 +14,17 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -67,7 +72,13 @@ public class signupFragment extends Fragment implements View.OnClickListener {
         Button clickedBtn = (Button) view; // 입력된 버튼 요소값
         for (int i = 0; i < btnArray.length; i++) {
             if (btnArray[i] == clickedBtn) {
-                if (i == 3) proceedSignup();
+                if (i == 3) {
+                    try {
+                        proceedSignup();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
                 else {
                     try {
                         checkAccount(i);
@@ -82,7 +93,6 @@ public class signupFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    // private void proceedSignup(int count, Boolean[] checkEmpty, String[] values) {}
 
 
     public void makeToast(String msg) {
@@ -109,11 +119,8 @@ public class signupFragment extends Fragment implements View.OnClickListener {
                    }
                 }
 
-
                 if (data.equals("OK")) {makeToast (String.format("사용가능한 %s입니다",key));}
                 else {makeToast (String.format("중복된 %s입니다",key));}
-
-
             }
         };
 
@@ -160,6 +167,7 @@ public class signupFragment extends Fragment implements View.OnClickListener {
                         msg.setData(bun);
                         handler.sendMessage(msg);} catch (IOException e) {
                         e.printStackTrace();
+                        httpConnection.disconnect();
                     }
 
 
@@ -212,11 +220,12 @@ public class signupFragment extends Fragment implements View.OnClickListener {
 //중복되는 항목이 없다면, 회원가입 진행
 //쿼리를 보내는 함수를 적용한다.
 
-    private void proceedSignup() //회원가입 루틴
+    private void proceedSignup() throws JSONException //회원가입 루틴
     {
         Boolean checkEmpty[] = new Boolean[5];
         Arrays.fill(checkEmpty, false);
         String values[] = new String[5];
+        JSONObject jsonObject = new JSONObject();
         int count = 0;
         values[0] = edtSid.getText().toString();
         values[1] = edtSemail.getText().toString();
@@ -235,7 +244,12 @@ public class signupFragment extends Fragment implements View.OnClickListener {
             {
                 values[3] = ((MainActivity) getActivity(    )).sha256(values[3]); //암호화 진행
 
-                makeToast("회원가입 성공");
+                jsonObject.put("id",values[0]);
+                jsonObject.put("em",values[1]);
+                jsonObject.put("pw",values[3]);
+                jsonObject.put("nn",values[2]);
+                sendSignup(jsonObject.toString());
+
             } else {
                 makeToast("비밀번호 확인이 일치하지 않습니다.");
             }
@@ -265,6 +279,64 @@ public class signupFragment extends Fragment implements View.OnClickListener {
             }
         }
     }
+//    실제 회원가입 쿼리를 보내는 공간
+    private void sendSignup(String json){
 
+        Handler handler = new Handler() {
+            public void handleMessage(Message msg) {
+                Bundle bun = msg.getData();
+                String data = null;
+                data = bun.getString("data");
+                if (data.equals("OK")) {makeToast ("회원가입을 성공하였습니다");}
+                else makeToast ("에러입니다");
+
+
+            }
+        };
+        new Thread() {
+            public void run() {
+                try {
+                    URLConnection URLconnection;
+                    String l="http://193.122.126.186:3000/signup"; //회원가입 루트
+                    URL url = new URL(l);
+
+                    URLconnection = url.openConnection();
+                    HttpURLConnection httpConnection = (HttpURLConnection) URLconnection;
+                    httpConnection.setRequestMethod("POST");//POST로 전송
+//                    httpConnection.setDoOutput(true);
+
+                    OutputStream os= httpConnection.getOutputStream();
+                    os.write(json.getBytes());
+                    os.flush();
+                    InputStream stream = httpConnection.getErrorStream();
+                    if (stream == null) {
+                        stream = httpConnection.getInputStream();
+                    }
+                    try { BufferedReader br = new BufferedReader(new InputStreamReader(stream,  "utf-8"));
+
+                        StringBuilder response = new StringBuilder();
+                        String responseLine = null;
+                        while ((responseLine = br.readLine()) != null) {
+                            response.append(responseLine.trim());
+                        }
+                        Bundle bun = new Bundle();
+                        bun.putString("data", response.toString()); //키값 과 value
+                        Message msg = handler.obtainMessage();
+                        msg.setData(bun);
+                        handler.sendMessage(msg);} catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+
+                } catch (MalformedURLException malformedURLException) {
+                    malformedURLException.printStackTrace();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+            }
+        }.start();
+    }
 
 }

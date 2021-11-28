@@ -19,10 +19,10 @@ public class MainActivity extends AppCompatActivity implements  loginFragment.On
     Runnable mTicker;
     Intent intent;
     private BackKeyHandler backKeyHandler = new BackKeyHandler(this);
-    @Override
-    public void onBackPressed() {
-        backKeyHandler.onBackPressed(2);
-    }
+//    @Override
+//    public void onBackPressed() {
+//        backKeyHandler.onBackPressed(2);
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

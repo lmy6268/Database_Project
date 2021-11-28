@@ -23,8 +23,6 @@ public class SubActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
-        searchfragment=new searchFragment();
-        setfragment=new setFragment();
         mapfragment=new mapFragment();
         fragmentManager=getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.container1, mapfragment).commit();
@@ -36,19 +34,36 @@ public class SubActivity extends AppCompatActivity {
                      public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                          switch (item.getItemId()) {
                              case R.id.tab_map:
-                                 getSupportFragmentManager().beginTransaction().show(mapfragment).commit();
-                                 if(setfragment!=null) getSupportFragmentManager().beginTransaction().hide(setfragment).commit();
-                                 if(searchfragment!=null)getSupportFragmentManager().beginTransaction().hide(searchfragment).commit();
+                                 if (mapfragment==null) {
+                                     mapfragment=new mapFragment();
+                                     fragmentManager.beginTransaction().add(R.id.container1, mapfragment).commit();
+
+                                 }
+                                 if(mapfragment!=null)fragmentManager.beginTransaction().show(mapfragment).commit();
+                                 if(setfragment!=null) fragmentManager.beginTransaction().hide(setfragment).commit();
+                                 if(searchfragment!=null)fragmentManager.beginTransaction().hide(searchfragment).commit();
+                                 return true;
 
                              case R.id.tab_search:
-                                 if (searchfragment==null) fragmentManager.beginTransaction().replace(R.id.container1, searchfragment).commit();
+                                 if (searchfragment==null) {
+                                     searchfragment=new searchFragment();
+                                     fragmentManager.beginTransaction().add(R.id.container1, searchfragment).commit();
 
-                                 if(setfragment!=null) getSupportFragmentManager().beginTransaction().hide(setfragment).commit();
-                                 if(searchfragment!=null)getSupportFragmentManager().beginTransaction().hide(searchfragment).commit();
+                                 }
+                                 if(searchfragment!=null)fragmentManager.beginTransaction().show(searchfragment).commit();
+                                 if(setfragment!=null)fragmentManager.beginTransaction().hide(setfragment).commit();
+                                 if(mapfragment!=null) fragmentManager.beginTransaction().hide(mapfragment).commit();
+
                                  return true;
 
                              case R.id.tab_setting:
-                                 getSupportFragmentManager().beginTransaction().replace(R.id.container1, setfragment).commit();
+                                 if (setfragment==null) {
+                                     setfragment=new setFragment();
+                                     fragmentManager.beginTransaction().add(R.id.container1, setfragment).commit();
+                                 }
+                                 if(setfragment!=null)fragmentManager.beginTransaction().show(setfragment).commit();
+                                 if(mapfragment!=null) fragmentManager.beginTransaction().hide(mapfragment).commit();
+                                 if(searchfragment!=null)fragmentManager.beginTransaction().hide(searchfragment).commit();
                                  return true;
                          }
                          return false;
