@@ -1,6 +1,14 @@
 var router = require('express').Router();
 var db = require('../models');
 
+
+//사용자의 post body를 처리하기 위한 미들웨어
+router.use(express.json());
+router.use(express.urlencoded({
+    extended: true
+}))
+
+
 //초기 화면 
 router.get('/', function (req, res) {
     res.send('Hello World!');
@@ -44,7 +52,7 @@ router.get('/products', (req, res) => {
     if (req.query.limit) limit = Number(req.query.limit);
 
     //쿼리문 정의 (Template Literal 사용)
-    var query = `Select prod_img, prod_name,prod_price, saletype  
+    var query = `Select prod_id,sal_id,prod_img, prod_name,prod_price, saletype  
     from products as p 
     join sales as s on s.prod_id=p.prod_id 
     ${where} ${category} ${N} ${store} 
@@ -56,12 +64,16 @@ router.get('/products', (req, res) => {
         .then(
             data => res.json(data)).catch(err => console.log(err));
 })
+
 //영양 정보를 보여주는 루트
 router.get('/nutrition', (req, res) => {
-    //req로 요청받은 값을 처리하는 부분
-    var name =req.query.name;
-    var store=req.query.store;
-    var query=`Select * from `;
+    var prodID=req.query.prodID;
+    var query=`Select * from nutrition where prod_id=${prodID}`;
+    db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.SELECT
+    })
+    .then(
+        data => res.json(data)).catch(err => console.log(err)); 
 }); 
 
 
@@ -122,10 +134,77 @@ router.post('/login', (req, res) => {
         })
         .then(
             data => {
-                if (data.length == 0) res.status(403); //데이터가 없는 경우 403 상태코드 리턴(접근 거부)
-                else res.status(200); //데이터가 있는 경우, 200 상태코드 리턴(접근 허가)
-            }).catch(err => console.log(err));
+                if (data.length == 0) 
+                {res.status(403);
+                res.send("Error")
+            } //데이터가 없는 경우 200 상태코드 리턴
+                else
+                 {
+                    res.status(200);
+                    res.send("OK");}//데이터가 있는 경우,400 상태코드 리턴(접근 허가) 및 에러 값 전달
+            }).catch(err => console.log(err)); //클라이언트에서 로그인 요청
 }) //클라이언트에서 로그인 요청
+
+
+
+//리뷰를 보여주는 루트
+router.get('/review/show',(req,res)=> {
+    var salID=req.query.salID;
+    var query=`select * from review where sal_id=${salID}`; //할인 상품과 관련된 리뷰를 보여줍니다.
+    db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.SELECT
+    })
+    .then(
+        data => {
+            res.status(200);//잘 실행된 경우
+            res.json(data)})
+        .catch(err =>{ // 에러난 경우
+            console.log(err);
+            res.status(400);
+            res.send("Error");
+        })
+})
+
+//리뷰를 삽입하는 루트
+route.get('/review/insert',(req,res)=> {
+    var salID=req.query.salID;
+    var userID=req.query.userID;
+    var content=req.query.content;
+    var rate=req.query.rate;
+    var query=`Insert INTO review(sal_id,user_id,content,rate) values(${salID},${userID},${content},${rate})`;
+    db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.INSERT
+    })
+    .then(
+        data => {
+            res.status(200);
+            res.json("OK")})
+        .catch(err =>{
+            console.log(err);
+            res.status(400);
+            res.send("Error");
+        })
+})
+
+//리뷰를 삽입하는 루트 => 한번 지우면 모든 댓글이 지워지는 문제가 생김... -> 날짜별로 아이디를 생성해야 할지 모르겠군요
+route.get('/review/delete',(req,res)=> {
+    var salID=req.query.salID;
+    var userID=req.query.userID;
+    var query=`Delete from review where sal_id="${salID}" and user_id="${userID}"`; // 회원아이디와 할인 아이디를 사용하여 리뷰를 지웁니다.
+    db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.DELETE
+    })
+    .then(
+        data => {
+            res.status(200);
+            res.send("OK")})
+        .catch(err =>{
+            console.log(err);
+            res.status(400);
+            res.send("Error");
+        })
+});
+
 
 //라우터 exports
 module.exports=router;
