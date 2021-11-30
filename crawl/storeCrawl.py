@@ -3,6 +3,7 @@ from multiprocessing import Process,Manager,freeze_support as fs
 import os
 import pickle #에러난 리스트를 저장함.
 import pymysql;from pymysql.constants import CLIENT
+import category
 
 #필요한 데이터 목록
 path=os.path.dirname(os.path.realpath(__file__))
@@ -24,6 +25,7 @@ def main():
     for proc in procs:
         proc.join()
     return result
+
 def handleResult(result):
     save_data(result)
 def handleError(error):

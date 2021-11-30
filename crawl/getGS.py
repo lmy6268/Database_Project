@@ -12,7 +12,7 @@ from lxml.html import fromstring,tostring
 from tqdm import tqdm
 #외부 파이썬 파일 import  
 import storeCrawl as sc
-
+path=os.path.dirname(os.path.realpath(__file__))
 # 함수 정의
 def checkLocated(driver,time,type,text):
     if type=='XPATH':
@@ -88,8 +88,7 @@ def crawl(items):
         'excludeSwitches', ['enable-logging'])  # 이상한 로그 표시 지우기
 
     # 드라이버 설정
-    driver = webdriver.Chrome(f'{os.getcwd()}\chromedriver.exe', options=options)
-    start_t=time.time()
+    driver = webdriver.Chrome(f'{path}\chromedriver.exe', options=options)
 
     # 웹사이트 연결
     driver.get(URL)
@@ -131,15 +130,9 @@ def crawl(items):
                 pageMove(MOD,driver, i,next)
                 data=parseData(MOD,driver,error)  
                 res.extend(data)
-    # print(error)
     driver.quit()
     print("end GS")
     result.append(res)
     result.append(error)
     items['GS']=result
     return items
-
-if __name__=='__main__':
-    result={}
-    result=crawl(result)
-    print(result['GS'][0])

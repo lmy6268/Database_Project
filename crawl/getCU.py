@@ -16,7 +16,7 @@ def crawl(items):
     options=webdriver.ChromeOptions() 
     options.add_argument('window-size=1920x1080')
     options.add_argument('--disable-gpu')
-    # options.add_argument('headless')
+    options.add_argument('headless')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])#이상한 로그 표시 지우기
     #드라이버 설정
     driver = webdriver.Chrome(f'{path}\chromedriver.exe',options=options)
