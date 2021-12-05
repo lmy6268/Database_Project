@@ -4,11 +4,7 @@ var express = require('express');
 
 
 
-// //사용자의 post body를 처리하기 위한 미들웨어
-router.use(express.json());
-router.use(express.urlencoded({
-    extended: true
-}))
+
 
 
 //초기 화면 
@@ -63,11 +59,7 @@ router.get('/products', (req, res) => {
     if (req.query.limit) limit = Number(req.query.limit);
 
     //쿼리문 정의 (Template Literal 사용)
-    var query = `Select prod_id,sal_id,prod_img, prod_name,prod_price, saletype  
-    from products as p 
-    join sales as s on s.prod_id=p.prod_id 
-    ${where} ${category} ${N} ${store} ${N2} ${name}
-    limit ${offset},${limit}`;
+    var query = `Select p.prod_id,sal_id,prod_img, prod_name,prod_price, saletype,prod_category from products as p join sales as s on s.prod_id=p.prod_id ${where} ${category} ${N} ${store} ${N2} ${name} limit ${offset},${limit}`;
     //쿼리 실행
     db.sequelize.query(query, {
             type: db.sequelize.QueryTypes.SELECT

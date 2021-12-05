@@ -5,7 +5,11 @@ var app = express();
 const port = 3000;
 const hostname = "10.0.0.226" //내부 IP 주소
 
-
+// //사용자의 post body를 처리하기 위한 미들웨어
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}))
 //user 토큰이 있어야 서버 이용이 가능=> 어플 내에서만 웹 접근이 가능하도록 하기 위함.
 app.use((req,res,next)=>{ 
     var a=req.header('user-token');
