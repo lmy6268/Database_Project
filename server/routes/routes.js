@@ -59,7 +59,7 @@ router.get('/products', (req, res) => {
     if (req.query.limit) limit = Number(req.query.limit);
 
     //쿼리문 정의 (Template Literal 사용)
-    var query = `Select p.prod_id,sal_id,prod_img, prod_name,prod_price, saletype,prod_category from products as p join sales as s on s.prod_id=p.prod_id ${where} ${category} ${N} ${store} ${N2} ${name} limit ${offset},${limit}`;
+    var query = `Select p.prod_id,store,prod_img, prod_name,prod_price, saletype,prod_category from products as p join sales as s on s.prod_id=p.prod_id ${where} ${category} ${N} ${store} ${N2} ${name} limit ${offset},${limit}`;
     //쿼리 실행
     db.sequelize.query(query, {
             type: db.sequelize.QueryTypes.SELECT
