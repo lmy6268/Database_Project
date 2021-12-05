@@ -89,8 +89,7 @@ def crawl(items):
 
     # 드라이버 설정
     driver = webdriver.Chrome(f'{path}\chromedriver.exe', options=options)
-
-    # 웹사이트 연결
+     # 웹사이트 연결
     driver.get(URL)
 
     # 페이지 목록 확인
@@ -130,6 +129,7 @@ def crawl(items):
                 pageMove(MOD,driver, i,next)
                 data=parseData(MOD,driver,error)  
                 res.extend(data)
+    # print(error)
     driver.quit()
     print("end GS")
     result.append(res)

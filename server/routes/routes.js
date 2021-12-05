@@ -1,7 +1,7 @@
 var router = require('express').Router();
 var db = require('../models');
 var express = require('express');
-const { noExtendLeft } = require('sequelize/dist/lib/operators');
+
 
 
 // //사용자의 post body를 처리하기 위한 미들웨어
@@ -27,15 +27,17 @@ router.get('/products', (req, res) => {
     //사용할 변수 초기화
     var store = "";
     var category = "";
+    var name = "";
     var where = "";
     var offset = 0; //기본값을 0으로 줌
     var limit = 20; //기본값을 20으로 줌
     var flag = false; //WHERE 표시 유무 체크용
     var count = 0; //AND 표시 유무 체크용
     var N = "";
+    var N2 = "";
     //분기문
     if (req.query.store) { //상품을 판매하는 곳이 지정된 경우
-        store = `%${req.query.store}%`
+        store = `%${req.query.store}%`;
         store = `s.store like "${store}"`;
         flag = true;
         count += 1
@@ -45,11 +47,18 @@ router.get('/products', (req, res) => {
         flag = true;
         count += 1;
     }
+    if (req.query.name) {
+        name = `%${req.query.store}%`;
+        name = `p.prod_name like "${name}"`;
+        flag = true;
+        count += 1
+    }
     if (flag) //where절이 필요한 경우 flag On
     {
         where = 'where'
     }
-    if (count >= 2) N = 'and'; //where절이 길어지는 경우 and가 필요함.
+    if (count == 2) N = 'and'; //where절이 길어지는 경우 and가 필요함.
+    if (count == 3) N2 = 'and';
     if (req.query.offset) offset = Number(req.query.offset);
     if (req.query.limit) limit = Number(req.query.limit);
 
@@ -57,7 +66,7 @@ router.get('/products', (req, res) => {
     var query = `Select prod_id,sal_id,prod_img, prod_name,prod_price, saletype  
     from products as p 
     join sales as s on s.prod_id=p.prod_id 
-    ${where} ${category} ${N} ${store} 
+    ${where} ${category} ${N} ${store} ${N2} ${name}
     limit ${offset},${limit}`;
     //쿼리 실행
     db.sequelize.query(query, {
@@ -146,6 +155,8 @@ router.get('/duplicate', (req, res) => {
 
 //로그인
 router.post('/login', (req, res) => {
+    var keys = Object.keys(req.body); //키를 가져옵니다. 이때, keys 는 반복가능한 객체가 됩니다.
+    req.body = JSON.parse(keys[0]);
     var ID = req.body.id; //아이디
     var PW = req.body.pass; //비밀번호, sha2 방식으로 저장됨.
     var query = `SELECT * from user WHERE user_id="${ID}" and user_pwd="${PW}"`; // 회원정보 조회 쿼리
@@ -154,6 +165,7 @@ router.post('/login', (req, res) => {
         })
         .then(
             data => {
+
                 if (data.length == 0) {
                     res.status(403);
                     res.send("Error")
