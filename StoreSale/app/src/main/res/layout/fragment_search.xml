@@ -4,50 +4,59 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="30dp">
+        android:layout_height="match_parent"
+        android:id="@+id/nestedscrollview"
+        android:layout_weight="1">
 
-
-        <Spinner
-            android:id="@+id/spinner"
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:entries="@array/category"></Spinner>
-
-        <EditText
-            android:id="@+id/edtSearch"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="15"
-            android:hint="물품명을 입력해주세요"
-            android:singleLine="true" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="검색" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingTop="30dp">
 
-    <ScrollView
-        android:id="@+id/scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/spinner"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:entries="@array/category"></Spinner>
+
+            <EditText
+                android:id="@+id/edtSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="15"
+                android:hint="물품명을 입력해주세요"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="검색" />
+        </LinearLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
+            android:overScrollMode="never"
+            android:nestedScrollingEnabled="false"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
 
         <ProgressBar
             android:id="@+id/progressbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-    </ScrollView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

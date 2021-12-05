@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.InputFilter;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +88,7 @@ public class loginFragment extends Fragment {
                     String pass=((MainActivity) getActivity()).sha256(edtLpass.getText().toString());
                     JSONObject jsonObject=new JSONObject();
                     try {
+                        Log.d("id",edtLid.getText().toString());
                         jsonObject.put("id",edtLid.getText().toString() );
                         jsonObject.put("pass", pass);
                         Handler handler = new Handler() {
@@ -110,6 +112,7 @@ public class loginFragment extends Fragment {
                                 String key = "login";
                                 String where="http://193.122.126.186:3000/login";
                                 DB db = new DB(where, key, handler);
+                                Log.d("data",jsonObject.toString());
                                 db.connectDB(jsonObject.toString(),"POST");
                             }
                         }.start();
