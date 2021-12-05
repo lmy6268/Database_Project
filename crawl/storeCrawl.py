@@ -63,7 +63,7 @@ def save_data(dic):
                     rs = curs.fetchall()
                     id_get=int(rs[0][0]) #얻은 아이디 
                     
-                # INSERT (물품을 sale테이블에 연관시킴)
+                # INSERT (물품을 sales테이블에 연관시킴)
                 with conn.cursor() as curs:
                     sql = "insert into sales(store,prod_id,saletype) values(%s,%s,%s) ON DUPLICATE KEY UPDATE saletype= %s,prod_id=%s"
                     curs.execute(sql,(k['store'],id_get,k['type'],k['type'],id_get))
@@ -114,6 +114,7 @@ if __name__ == '__main__':
     fs()
     A=main()
     result=[A['GS'][0],A['CU'][0]]
-    error=[A['GS'][1],A['CU'][1]]
-    handleResult(result)
-    handleError(error)
+    error=[A['GS'][1],A['CU'][1]] #카테고리 재분류 필요 ( 분류가 안되어있어서)
+    # handleResult(result)
+    # handleError(error)
+    save_data(result)
