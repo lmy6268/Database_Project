@@ -41,6 +41,7 @@ def cleanText_B(text):
     text=cleanText(text)
     return text
 def initialize(): #초기화
+    
     file=path+"/DB.csv"
     if not os.path.isfile(file): #DB를 다운받는다 <- 파일이 없는 경우
         url='https://www.foodsafetykorea.go.kr/fcdb/multi/file/download.do?key=HtK2y16FQ6u7tmufhjNj/mzODIJChbAtR0F90BhWEH4AV/ufMC8q0UsclPMMhZuqLq3+fvSOmRzDh7j/xJm53A=='
@@ -109,11 +110,9 @@ def initialize(): #초기화
     df.to_csv(file2,index=False, encoding="utf-8-sig")
 def main(text):#검사할 문장을 인자로 받아온다
     global ID
-
     if not os.path.isfile(file2) :
         initialize()
         return main(text)
-
     else:
         start_t=time.time()
         df=pd.read_csv(file2)
@@ -122,9 +121,7 @@ def main(text):#검사할 문장을 인자로 받아온다
         length=len(df)
         check=False
         count=0
-        
-        #가장 이름이 유사한 식품을 찾아 그 행의 번호를 추출한다.
-
+        #가장 유사한 식품을 찾아 그 행의 번호를 추출한다.
         #문장 비교
         for i in range(length):
             try:
@@ -141,7 +138,7 @@ def main(text):#검사할 문장을 인자로 받아온다
                         check=True
                         ID=i
                     elif cur_score>m[0]:  #유사도 측정
-                        m=[cur_score,data,i] #업데이트
+                        m=[cur_score,data,i]
                         check=True
                 else:
                     if check==True:count+=1

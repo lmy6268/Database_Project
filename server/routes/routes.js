@@ -44,7 +44,7 @@ router.get('/products', (req, res) => {
         count += 1;
     }
     if (req.query.name) {
-        name = `%${req.query.store}%`;
+        name = `%${req.query.name}%`;
         name = `p.prod_name like "${name}"`;
         flag = true;
         count += 1
