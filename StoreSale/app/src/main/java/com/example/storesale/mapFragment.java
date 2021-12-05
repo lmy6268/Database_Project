@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import net.daum.android.map.MapViewEventListener;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,8 +55,10 @@ public class mapFragment extends Fragment {
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
     MapPOIItem currLoc;
     ViewGroup mapViewContainer;
+
     public mapFragment() {
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -89,6 +93,7 @@ public class mapFragment extends Fragment {
 
         return i;
     }
+
     class Location //위도 경도를 담을 수 있는 클래스
     {
         double latitude;
@@ -116,12 +121,18 @@ public class mapFragment extends Fragment {
         if (mapView.findPOIItemByTag(0) != null) {
             mapView.removePOIItem(mapView.findPOIItemByTag(0));
         }
-        mapView.setZoomLevel(1, true);
-        setMarker(currLoc, MapPoint.mapPointWithGeoCoord(latitude, longtitude), 0);
+        mapView.setZoomLevel(2, true);
+        mapView.setMapViewEventListener(mapView.getMapViewEventListener());
+        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting();
+        } else {
+            checkRunTimePermission();
+        }
         mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longtitude), true);
         String address = getCurrentAddress(latitude, longtitude); //주소로 변환
         tv_location.setText(address);
-        setCvsMaker(latitude,longtitude);
+        setCvsMaker(latitude, longtitude);
     }
 
     @Override
@@ -275,34 +286,33 @@ public class mapFragment extends Fragment {
                 || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-    public void setMarker_cvs(Location[] locations,String[] storeName) {
+    public void setMarker_cvs(Location[] locations, String[] storeName) {
         MapPOIItem marker[] = new MapPOIItem[locations.length];//locations의 개수만큼 마커를 생성
+
         MapPoint point[] = new MapPoint[locations.length];
+//        System.out.println(Arrays.toString(locations) + Arrays.toString(storeName));
         for (int i = 0; i < locations.length; i++) {
+            marker[i]=new MapPOIItem();
             point[i] = MapPoint.mapPointWithGeoCoord(locations[i].getLat(), locations[i].getLong()); //맵포인트 생성
         }
         for (int i = 0; i < locations.length; i++) {
-
-            setMarker(marker[i], point[i], i + 1,storeName[i]);
+            System.out.println(storeName[i]);
+            System.out.println(marker[i].toString());
+            setMarker(marker[i], point[i], i + 1, storeName[i]);
         }
     }
 
-    private void setMarker(MapPOIItem marker, MapPoint point, int i,String storeName) {
+    private void setMarker(MapPOIItem marker, MapPoint point, int i, String storeName) {
         marker.setItemName(storeName);
         marker.setTag(i);
         marker.setMapPoint(point);
-        marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
-        mapView.addPOIItem(marker);
-    }
-    private void setMarker(MapPOIItem marker, MapPoint point, int i) {
-        marker.setTag(i);
-        marker.setMapPoint(point);
-        marker.setMarkerType(MapPOIItem.MarkerType.YellowPin);
+        marker.setMarkerType(MapPOIItem.MarkerType.RedPin); // 기본으로 제공하는 BluePin 마커 모양.
+        marker.setSelectedMarkerType(MapPOIItem.MarkerType.YellowPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
         mapView.addPOIItem(marker);
     }
 
-    private void setCvsMaker(double x,double y) //서버와 송수신하고, print까지 한다.
+
+    private void setCvsMaker(double x, double y) //서버와 송수신하고, print까지 한다.
     {
 
         Handler handler = new Handler() {
@@ -310,53 +320,62 @@ public class mapFragment extends Fragment {
                 Bundle bun = msg.getData();
                 String data = bun.getString("HTML_DATA");
                 JSONObject json = null;
-                JSONArray jsonArray=null;
-                String [] storeName=null;
+                JSONArray jsonArray = null;
+                String[] storeName = null;
 //                String [] storeAddress=null;
-//                String [] distance=null;
-                Location[] loc=null;
+                String [] distance=null;
+                Location[] loc = null;
 //                mapViewContainer.removeView(mapView);
 //                mapViewContainer.addView(mapView);
+//                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
                 try {
                     json = new JSONObject(data);
                     jsonArray = (JSONArray) json.get("documents");
-                    loc=new Location[jsonArray.length()]; //위도 경도
-                    storeName=new String[jsonArray.length()]; //가게 이름
+                    loc = new Location[jsonArray.length()]; //위도 경도
+                    storeName = new String[jsonArray.length()]; //가게 이름
 //                    storeAddress=new String[json.length()];// 주소
-//                    for(int i=0;i< jsonArray.length();i++){
-//                        JSONObject storeObject = (JSONObject) jsonArray.get(i);
-//                        loc[i]= new Location(storeObject.getDouble("y"),storeObject.getDouble("x"));
-//                        storeName[i]=storeObject.getString("place_name");
-//                    }
-//                    setMarker_cvs(loc,storeName);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject storeObject = (JSONObject) jsonArray.get(i);
+                        loc[i] = new Location(storeObject.getDouble("y"), storeObject.getDouble("x"));
+                        storeName[i] = storeObject.getString("place_name")+"("+storeObject.getString("distance")+"m)";
+                    }
+
+                    setMarker_cvs(loc, storeName);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
-        };
-
-        new Thread() {
-            public void run() {
-                String result="";
-                try {
-                    result=connection(x,y);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Bundle bun = new Bundle();
-                bun.putString("HTML_DATA", result);
-                Message msg = handler.obtainMessage();
-                msg.setData(bun);
-                handler.sendMessage(msg);
-            }
-        }.start();
 
     }
-    private String connection(double x,double y) throws IOException {
+
+    ;
+
+        new
+
+    Thread() {
+        public void run () {
+            String result = "";
+            try {
+                result = connection(x, y);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Bundle bun = new Bundle();
+            bun.putString("HTML_DATA", result);
+            Message msg = handler.obtainMessage();
+            msg.setData(bun);
+            handler.sendMessage(msg);
+        }
+    }.
+
+    start();
+
+}
+
+    private String connection(double x, double y) throws IOException {
         int findRad = 250;
         String groupCd = "CS2";
-        String domain = String.format("https://dapi.kakao.com/v2/local/search/category.json?category_group_code=%s&x=%f&y=%f&radius=%d",groupCd,y,x, findRad);
+        String domain = String.format("https://dapi.kakao.com/v2/local/search/category.json?category_group_code=%s&x=%f&y=%f&radius=%d", groupCd, y, x, findRad);
         URL url = new URL(domain);
         String key = getResources().getString(R.string.Restkey); //API 키
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

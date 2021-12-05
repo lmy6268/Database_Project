@@ -1,6 +1,7 @@
 package com.example.storesale;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements  loginFragment.On
 
     public void onChange(int num) {
         switch (num) {
-            case 1: //로그인 메뉴
+            case 1: //로그인 메뉴]
+
                 fragmentManager.beginTransaction().replace(R.id.container1, loginFragment).commitAllowingStateLoss();
                 break;
             case 2: //로딩메뉴
@@ -59,12 +61,35 @@ public class MainActivity extends AppCompatActivity implements  loginFragment.On
                 break;
         }
     }
+    private void clearBackStack() {
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        while (fragmentManager.getBackStackEntryCount() != 0) {
+            fragmentManager.popBackStackImmediate();
+        }
+    }
+    public void onChange(int num,Boolean b) {
+
+        switch (num) {
+            case 1: //로그인 메뉴]
+                if (b==true) fragmentManager.popBackStackImmediate();
+                else fragmentManager.beginTransaction().replace(R.id.container1, loginFragment).commitAllowingStateLoss();
+                break;
+            case 2: //로딩메뉴
+                fragmentManager.beginTransaction().replace(R.id.container1, loadingFragment).commitAllowingStateLoss();
+                break;
+            case 3: //회원가입 메뉴
+
+                fragmentManager.beginTransaction().replace(R.id.container1, signupFragment).addToBackStack(null).commitAllowingStateLoss();
+                break;
+        }
+    }
 
     @Override
     public void loginSuccess(Boolean check) //로그인이 된 이후에만 액티비티 변경
     {
         if (check==true) {
             startActivity(intent); //인텐트를 통한 액티비티전환
+
             finish();
         }
     }

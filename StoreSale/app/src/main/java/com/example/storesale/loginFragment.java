@@ -3,6 +3,10 @@ package com.example.storesale;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +15,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.regex.Pattern;
 
 public class loginFragment extends Fragment {
     private Button btnSignup, btnLogin;//회원가입 버튼, 로그인 버튼
@@ -28,6 +37,27 @@ public class loginFragment extends Fragment {
             this.activity = (Activity)context;
         }
     }
+    //문자열 필터링
+    protected InputFilter filter= new InputFilter() {
+
+        public CharSequence filter(CharSequence source, int start, int end,
+
+                                   Spanned dest, int dstart, int dend) {
+
+
+
+            Pattern ps = Pattern.compile("^[a-zA-Z0-9]+$");
+
+            if (!ps.matcher(source).matches()) {
+
+                return "";
+
+            }
+            return null;
+
+        }
+
+    };
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -54,8 +84,39 @@ public class loginFragment extends Fragment {
                     Toast.makeText(context, "비밀번호를 입력하여주세요", Toast.LENGTH_SHORT).show(); // 비밀번호 필드가 비었을 경우
                 else // 비어있는 필드가 없을 경우 => 로그인 수행
                 {
-                    //https POST 요청을 통하여 해당 회원정보가 존재하는지 확인
-                    ((OnloginSuccessListener)activity).loginSuccess(true);
+                    String pass=((MainActivity) getActivity()).sha256(edtLpass.getText().toString());
+                    JSONObject jsonObject=new JSONObject();
+                    try {
+                        jsonObject.put("id",edtLid.getText().toString() );
+                        jsonObject.put("pass", pass);
+                        Handler handler = new Handler() {
+                            public void handleMessage(Message msg) {
+
+                                Bundle bun = msg.getData();
+                                String data = bun.getString("login");
+
+                                if (data.equals("OK")) {
+                                    Toast.makeText(getContext(),"로그인을 성공하였습니다",Toast.LENGTH_SHORT).show();
+                                    edtLid.setText("");
+                                    edtLpass.setText("");
+                                    ((MainActivity) getActivity()).loginSuccess(true);
+                                } else {
+                                    Toast.makeText(getContext(),"다시 시도해주세요",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        };
+                        new Thread() {
+                            public void run() {
+                                String key = "login";
+                                String where="http://193.122.126.186:3000/login";
+                                DB db = new DB(where, key, handler);
+                                db.connectDB(jsonObject.toString(),"POST");
+                            }
+                        }.start();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -67,6 +128,7 @@ public class loginFragment extends Fragment {
                 ((MainActivity)getActivity()).onChange(3);
             }
         });
+
         return i;
     }
 }

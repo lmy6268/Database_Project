@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
-
+//회원정보를 보여주는 프레그먼트
 public class setFragment extends Fragment {
 
     public setFragment() {
