@@ -123,7 +123,7 @@ public class searchFragment extends Fragment {
         }
         try {
             if(!category.equals("")){
-            map.put("category", category);}
+            map.put("cat", category);}
         } catch (NullPointerException err) {
 
         }

@@ -38,11 +38,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product item = mData.get(position);
+        String saled=null;
         Glide.with(context).load(item.getUrl()).override(80,80).into(holder.item_img);//80*80사이즈로 이미지를 가져옴
         holder.tvtitle.setText(item.getName());
-        holder.tvprice.setText(item.getProd_price());
-        holder.tvtype.setText(item.getType());
         holder.tvstore.setText(item.getStore());
+        holder.tvtype.setText(item.getType());
+        if (item.getType().equals("1+1")){saled= String.valueOf(Integer.parseInt(item.getProd_price())/2);}
+        else{saled= String.valueOf((Integer.parseInt(item.getProd_price())*2)/3);}
+        holder.tvprice.setText("￦"+saled+" (￦"+item.getProd_price()+")");
         holder.tvcat.setText(item.getCategory());
     }
     // getItemCount : 전체 데이터의 개수를 리턴
