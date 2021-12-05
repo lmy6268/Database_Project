@@ -43,6 +43,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.tvprice.setText(item.getProd_price());
         holder.tvtype.setText(item.getType());
         holder.tvstore.setText(item.getStore());
+        holder.tvcat.setText(item.getCategory());
     }
     // getItemCount : 전체 데이터의 개수를 리턴
     @Override
@@ -52,7 +53,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // 아이템 뷰를 저장하는 뷰홀더 클래스
     public class ViewHolder extends RecyclerView.ViewHolder {
        ImageView item_img;
-       TextView tvstore,tvtitle,tvprice,tvtype;
+       TextView tvstore,tvtitle,tvprice,tvtype,tvcat;
         ViewHolder(View itemView) {
             super(itemView); // 뷰 객체에 대한 참조
            item_img=itemView.findViewById(R.id.item_img);
@@ -60,7 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
            tvstore=itemView.findViewById(R.id.tvstore);
            tvprice=itemView.findViewById(R.id.tvprice);
            tvtype=itemView.findViewById(R.id.tvtype);
-
+            tvcat=itemView.findViewById(R.id.tvcat);
         }
     }
 }

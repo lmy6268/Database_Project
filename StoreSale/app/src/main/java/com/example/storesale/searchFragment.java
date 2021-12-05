@@ -162,7 +162,8 @@ public class searchFragment extends Fragment {
                 String url = jsonObject.getString("prod_img");
                 String type = jsonObject.getString("saletype");
                 String price = jsonObject.getString("prod_price");
-                Product data = new Product(url, name, store, price, type, id);
+                String category = jsonObject.getString("prod_category");
+                Product data = new Product(url, name, store, price, type, id,category);
                 mList.add(data);
 
             } catch (JSONException e) {
