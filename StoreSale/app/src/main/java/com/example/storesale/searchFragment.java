@@ -24,7 +24,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +48,7 @@ public class searchFragment extends Fragment {
     private NestedScrollView nscrollview;
     private ProgressBar progressbar;
     private String keyword = null;
-    private int offset = 0, limit = 10;//페이징 처리용 변수
+    private int offset = 0, limit = 5;//페이징 처리용 변수
 
     public searchFragment() {
     }
@@ -71,6 +73,10 @@ public class searchFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 category = parent.getItemAtPosition(position).toString(); //현재 선택된 값을 검색 카테고리로 지정
+                offset = 0;
+                limit = 5;
+                mList.clear();
+                getData();
             }
 
             @Override
@@ -83,7 +89,8 @@ public class searchFragment extends Fragment {
             public void onClick(View v) {
                 keyword = edtSearch.getText().toString();
                 offset = 0;
-                limit = 10;
+                limit = 5;
+                mList.clear();
                 getData();
             }
         });
@@ -123,7 +130,8 @@ public class searchFragment extends Fragment {
         }
         try {
             if(!category.equals("")){
-            map.put("cat", category);}
+                if(!category.equals("카테고리전체")) map.put("cat", category);}
+            if(category.equals("카테고리전체")) Log.d("erroir","카테고리 전체 ㅎㅎㅎㅎ");
         } catch (NullPointerException err) {
 
         }
@@ -141,6 +149,11 @@ public class searchFragment extends Fragment {
                         parseResult(jsonArray);
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        try {
+                            response.errorBody().string();
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
                     }
                 }
             }
@@ -165,6 +178,7 @@ public class searchFragment extends Fragment {
                 String category = jsonObject.getString("prod_category");
                 Product data = new Product(url, name, store, price, type, id,category);
                 mList.add(data);
+                Log.d("data",Arrays.toString(mList.toArray()));
 
             } catch (JSONException e) {
                 e.printStackTrace();

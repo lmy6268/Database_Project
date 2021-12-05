@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 
@@ -39,7 +40,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product item = mData.get(position);
         String saled=null;
-        Glide.with(context).load(item.getUrl()).override(80,80).into(holder.item_img);//80*80사이즈로 이미지를 가져옴
+        RequestOptions options = new RequestOptions().override(80,80).error(R.drawable.file).fallback(R.drawable.file).centerCrop();
+
+        Glide.with(context).load(item.getUrl()).apply(options).into(holder.item_img);//80*80사이즈로 이미지를 가져옴
         holder.tvtitle.setText(item.getName());
         holder.tvstore.setText(item.getStore());
         holder.tvtype.setText(item.getType());
