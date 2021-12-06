@@ -71,11 +71,8 @@ router.get('/products', (req, res) => {
 //영양 정보를 보여주는 루트
 router.get('/nutrition', (req, res) => {
     //req로 요청받은 값을 처리하는 부분
-    var name = req.query.name;
-    var store = req.query.store;
-    var query = ` Select p.prod_id,por,kcal,tan,sugar,fofat,protein,fat,nat,transfat,coles 
-    from (Select prod_id from products where prod_name="${name}")p, 
-    nutrition n where p.prod_id=n.prod_id `;
+    var id = req.query.id
+    var query = `Select por,kcal,tan,sugar,fofat,protein,fat,nat,transfat,coles from nutrition where prod_id=${id}`
     db.sequelize.query(query, {
             type: db.sequelize.QueryTypes.SELECT
         })
