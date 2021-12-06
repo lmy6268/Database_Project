@@ -48,7 +48,12 @@ public class searchFragment extends Fragment {
     private NestedScrollView nscrollview;
     private ProgressBar progressbar;
     private String keyword = null;
-    private int offset = 0, limit = 5;//페이징 처리용 변수
+    private int offset = 0, limit = 0;//페이징 처리용 변수
+
+    public void setValue() {
+        offset = 0;
+        limit = 20;
+    }
 
     public searchFragment() {
     }
@@ -73,8 +78,7 @@ public class searchFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 category = parent.getItemAtPosition(position).toString(); //현재 선택된 값을 검색 카테고리로 지정
-                offset = 0;
-                limit = 5;
+                setValue();
                 mList.clear();
                 getData();
             }
@@ -88,8 +92,7 @@ public class searchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 keyword = edtSearch.getText().toString();
-                offset = 0;
-                limit = 5;
+                setValue();
                 mList.clear();
                 getData();
             }
@@ -123,15 +126,17 @@ public class searchFragment extends Fragment {
 //        if (keyword!=null||keyword!="") {}
         Log.d("카테고리", category + keyword);
         try {
-            if(!keyword.equals("")){
-            map.put("name", keyword);}
+            if (!keyword.equals("")) {
+                map.put("name", keyword);
+            }
         } catch (NullPointerException err) {
 
         }
         try {
-            if(!category.equals("")){
-                if(!category.equals("카테고리전체")) map.put("cat", category);}
-            if(category.equals("카테고리전체")) Log.d("erroir","카테고리 전체 ㅎㅎㅎㅎ");
+            if (!category.equals("")) {
+                if (!category.equals("카테고리전체")) map.put("cat", category);
+            }
+            if (category.equals("카테고리전체")) Log.d("erroir", "카테고리 전체 ㅎㅎㅎㅎ");
         } catch (NullPointerException err) {
 
         }
@@ -176,9 +181,9 @@ public class searchFragment extends Fragment {
                 String type = jsonObject.getString("saletype");
                 String price = jsonObject.getString("prod_price");
                 String category = jsonObject.getString("prod_category");
-                Product data = new Product(url, name, store, price, type, id,category);
+                Product data = new Product(url, name, store, price, type, id, category);
                 mList.add(data);
-                Log.d("data",Arrays.toString(mList.toArray()));
+                Log.d("data", Arrays.toString(mList.toArray()));
 
             } catch (JSONException e) {
                 e.printStackTrace();

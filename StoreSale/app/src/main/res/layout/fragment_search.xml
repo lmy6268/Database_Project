@@ -46,6 +46,7 @@
 
 
         <androidx.recyclerview.widget.RecyclerView
+            android:descendantFocusability="blocksDescendants"
             android:id="@+id/recycler_view"
             android:overScrollMode="never"
             android:nestedScrollingEnabled="false"
