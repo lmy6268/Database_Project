@@ -29,7 +29,7 @@ def main():
 def handleResult(result):
     save_data(result)
 def handleError(error):
-    with open('error.pkl','wb') as f:
+    with open(f'{path}error.pkl','wb') as f:
         pickle.dump(error,f)
 def save_data(dic):
     reset_idp = "ALTER TABLE products AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE products SET prod_id = @COUNT:=@COUNT+1;"

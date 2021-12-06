@@ -4,9 +4,10 @@
 #2. 각 상품의 id와 상품명을 리스트에 넣음
 #3. for문을 돌라면서, 영양정보에 상품명과 일치하는 데이터를 리스트로 뽑아옴.
 #4. insert를 통해 영양정보 테이블에 저장.
-import pickle #에러난 리스트를 저장함.
+import pickle 
+#에러가 났을 때 빠른 수정을 위하여, 데이터를 임시저장
 def handleError(data):
-    with open('data','wb') as f:
+    with open(f'{path}/data.pkl','wb') as f:
         pickle.dump(data,f)
 #1번 부분 부터 해보자
 import pymysql 
@@ -31,7 +32,7 @@ prod_name=[] #상품 테이블의 상품명
 try:
     #1번 부분 
     with conn.cursor() as curs:
-        sql = "select prod_id,prod_name FROM products where prod_category in('과자','식품','음료')" #데이터들중 식품들만 가져옴
+        sql = "select prod_id,prod_name FROM products where prod_category in('과자','식품','음료','아이스크림')" #데이터들중 식품들만 가져옴
         curs.execute(sql)
         rs = curs.fetchall()
         prod_id=[i[0] for i in rs]
@@ -52,14 +53,15 @@ try:
         else:
             print(i[0],result)
             i.append('None')
-    handleError(item)
+    # with open('data','rb') as f:
+    #     item=pickle.load(f)
+    # handleError(item)
     #4번 부분 
     reset_idp = "ALTER TABLE nutrition AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE nutrition SET id = @COUNT:=@COUNT+1;"
     with conn.cursor() as curs:
                 curs.execute(reset_idp)
     with conn.cursor() as cur2:
-        for i in item[0]:
-            print(i[1])
+        for i in item:
             if i[-1]!="None":
                 sql=f'Insert into nutrition(prod_id,por,kcal,tan,sugar,protein,fat,fofat,transfat,coles,nat) values ("{i[1]}","{i[2]}","{i[3]}","{i[4]}","{i[5]}","{i[6]}","{i[7]}","{i[8]}","{i[9]}","{i[10]}","{i[11]}")'
                 cur2.execute(sql)
