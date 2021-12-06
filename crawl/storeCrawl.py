@@ -29,7 +29,7 @@ def main():
 def handleResult(result):
     save_data(result)
 def handleError(error):
-    with open('error.pkl','wb') as f:
+    with open(f'{path}error.pkl','wb') as f:
         pickle.dump(error,f)
 def save_data(dic):
     reset_idp = "ALTER TABLE products AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE products SET prod_id = @COUNT:=@COUNT+1;"
@@ -42,6 +42,7 @@ def save_data(dic):
     "client_flag": CLIENT.MULTI_STATEMENTS}
     #sql과 통신하는 부분
     conn= pymysql.connect(**data)
+    print("서버에 업로드 중")
     try:
         with conn.cursor() as curs:
                 curs.execute(reset_idp)
@@ -51,8 +52,8 @@ def save_data(dic):
                 id_get=0
                 # INSERT (물품을 넣음)
                 with conn.cursor() as curs:
-                    prod_sql = "INSERT INTO products(prod_name,prod_img,prod_price,prod_category) values(%s,%s, %s, %s) ON DUPLICATE KEY UPDATE prod_img = %s,prod_price= %s"
-                    curs.execute(prod_sql, (k['name'],k['image'],int(k['price']),k['category'],k['image'],int(k['price'])))
+                    prod_sql = "INSERT INTO products(prod_name,prod_img,prod_category) values(%s,%s, %s) ON DUPLICATE KEY UPDATE prod_img = %s"
+                    curs.execute(prod_sql, (k['name'],k['image'],k['category'],k['image']))
                 
                 conn.commit()
             
@@ -63,10 +64,10 @@ def save_data(dic):
                     rs = curs.fetchall()
                     id_get=int(rs[0][0]) #얻은 아이디 
                     
-                # INSERT (물품을 sales테이블에 연관시킴)
+                # INSERT (물품을 sale테이블에 연관시킴)
                 with conn.cursor() as curs:
-                    sql = "insert into sales(store,prod_id,saletype) values(%s,%s,%s) ON DUPLICATE KEY UPDATE saletype= %s,prod_id=%s"
-                    curs.execute(sql,(k['store'],id_get,k['type'],k['type'],id_get))
+                    sql = "insert into sales(store,prod_id,saletype,prod_price) values(%s,%s,%s,%s) ON DUPLICATE KEY UPDATE saletype= %s,prod_id=%s,prod_price=%s"
+                    curs.execute(sql,(k['store'],id_get,k['type'],int(k['price']),k['type'],id_get,int(k['price'])))
                         
                 conn.commit()
         
@@ -114,7 +115,6 @@ if __name__ == '__main__':
     fs()
     A=main()
     result=[A['GS'][0],A['CU'][0]]
-    error=[A['GS'][1],A['CU'][1]] #카테고리 재분류 필요 ( 분류가 안되어있어서)
-    # handleResult(result)
-    # handleError(error)
-    save_data(result)
+    error=[A['GS'][1],A['CU'][1]]
+    handleResult(result)
+    handleError(error)

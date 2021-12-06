@@ -1,18 +1,14 @@
 #가공된 데이터를 가지고 실제로 데이터를 데이터베이스에 저장하는 python 파일
-
 #영양정보를 테이블에 넣는 루틴
-#1. SELECT를 통해 현재 상품테이블에 있는 상품(상품 중 식품만)을 가져옴
+#1. SELECT를 통해 현재 상품테이블에 있는 상품을 가져옴
 #2. 각 상품의 id와 상품명을 리스트에 넣음
-#3. for문을 돌리면서, 영양정보에 상품명과 일치하는 데이터를 리스트로 뽑아옴.
+#3. for문을 돌라면서, 영양정보에 상품명과 일치하는 데이터를 리스트로 뽑아옴.
 #4. insert를 통해 영양정보 테이블에 저장.
-
-
-import pickle #에러난 리스트를 저장함.
+import pickle 
+#에러가 났을 때 빠른 수정을 위하여, 데이터를 임시저장
 def handleError(data):
-    with open('data','wb') as f:
+    with open(f'{path}/data.pkl','wb') as f:
         pickle.dump(data,f)
-
-
 #1번 부분 부터 해보자
 import pymysql 
 import os
@@ -33,7 +29,6 @@ data={"host" : "193.122.126.186",
 conn= pymysql.connect(**data)
 prod_id=[] #상품 테이블의 id
 prod_name=[] #상품 테이블의 상품명
-
 try:
     #1번 부분 
     with conn.cursor() as curs:
@@ -53,16 +48,20 @@ try:
         result=gn.main(i[0])
         
         if result!=None:
+            print(i[0],result,result[1:])
             i.extend(result[1:])
         else:
+            print(i[0],result)
             i.append('None')
-    handleError(item)
+    # with open('data','rb') as f:
+    #     item=pickle.load(f)
+    # handleError(item)
     #4번 부분 
     reset_idp = "ALTER TABLE nutrition AUTO_INCREMENT=1;SET @COUNT = 0;UPDATE nutrition SET id = @COUNT:=@COUNT+1;"
     with conn.cursor() as curs:
                 curs.execute(reset_idp)
     with conn.cursor() as cur2:
-        for i in item[0]:
+        for i in item:
             if i[-1]!="None":
                 sql=f'Insert into nutrition(prod_id,por,kcal,tan,sugar,protein,fat,fofat,transfat,coles,nat) values ("{i[1]}","{i[2]}","{i[3]}","{i[4]}","{i[5]}","{i[6]}","{i[7]}","{i[8]}","{i[9]}","{i[10]}","{i[11]}")'
                 cur2.execute(sql)
