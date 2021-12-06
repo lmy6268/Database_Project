@@ -3,7 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/drawable/border.xml" value="0.22135416666666666" />
+        <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/drawable/borderline.xml" value="0.22135416666666666" />
+        <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/layout/fragment_loading.xml" value="0.3333333333333333" />
         <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/layout/fragment_login.xml" value="0.23278985507246377" />
+        <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/layout/fragment_nutrition.xml" value="0.4533947065592635" />
         <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/layout/fragment_search.xml" value="0.25" />
         <entry key="..\:/KY/School Project/DBproject/Database_Project/StoreSale/app/src/main/res/layout/recycler_item.xml" value="0.67" />
       </map>
