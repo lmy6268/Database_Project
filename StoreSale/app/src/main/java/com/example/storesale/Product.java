@@ -1,6 +1,8 @@
 package com.example.storesale;
 
-public class Product //상품목록을 가져올 때 객체로 가져오기 위해 따로 구현
+import java.io.Serializable;
+
+public class Product implements Serializable //상품목록을 가져올 때 객체로 가져오기 위해 따로 구현
 {
     private String img_url=null;
     private String prod_name=null;
@@ -34,7 +36,7 @@ public class Product //상품목록을 가져올 때 객체로 가져오기 위�
         return sale_type;
     }
     public String getCategory(){return category;}
-
+    public int getProd_id(){return prod_id;}
     //상품의 정보를 보여줄 것을 표시 => 이미지, 상품명, 할인 편의점 명, 가격, 할인 타입
     //영양정보를 표시하기 위해 => prod_id
 }

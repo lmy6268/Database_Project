@@ -17,6 +17,7 @@ public class SubActivity extends AppCompatActivity {
     searchFragment searchfragment;
     mapFragment mapfragment;
     setFragment setfragment;
+    nutritionFragment nutritionfragment;
     private BackKeyHandler backKeyHandler = new BackKeyHandler(this);
 
     @Override
@@ -75,10 +76,19 @@ public class SubActivity extends AppCompatActivity {
         backKeyHandler.onBackPressed(2);
     }
 
-    public void changeTab(int num) { //탭을 이동하는 메소드
-        switch (num) {
-
-        }
+    public void changeFrag(Product item) { //탭을 이동하는 메소드
+        Bundle bundle = new Bundle();//번들을 통해 id값 전달해야 함
+        bundle.putSerializable("item",item);//번들에 넘길 값 저장
+        nutritionfragment=new nutritionFragment();
+        nutritionfragment.setArguments(bundle);
+        fragmentManager.beginTransaction().add(R.id.container1, nutritionfragment).commit();
+        fragmentManager.beginTransaction().show(nutritionfragment).commit();
+        fragmentManager.beginTransaction().hide(searchfragment).commit();
+    }
+    public void backFrag(){
+        fragmentManager.beginTransaction().hide(nutritionfragment).commit();
+        fragmentManager.beginTransaction().remove(nutritionfragment).commit();
+        fragmentManager.beginTransaction().show(searchfragment).commit();
     }
 
 }

@@ -373,7 +373,7 @@ public class mapFragment extends Fragment {
 }
 
     private String connection(double x, double y) throws IOException {
-        int findRad = 250;
+        int findRad = 400;
         String groupCd = "CS2";
         String domain = String.format("https://dapi.kakao.com/v2/local/search/category.json?category_group_code=%s&x=%f&y=%f&radius=%d", groupCd, y, x, findRad);
         URL url = new URL(domain);

@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,7 +51,8 @@ public class searchFragment extends Fragment {
     private ProgressBar progressbar;
     private String keyword = null;
     private int offset = 0, limit = 0;//페이징 처리용 변수
-
+    private Boolean check=false;
+    private FragmentManager manager;
     public void setValue() {
         offset = 0;
         limit = 20;
@@ -73,12 +76,14 @@ public class searchFragment extends Fragment {
         spinner = i.findViewById(R.id.spinner);
         edtSearch = i.findViewById(R.id.edtSearch);
         btnSearch = i.findViewById(R.id.btnSearch);
+        setValue();
         getData();
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 category = parent.getItemAtPosition(position).toString(); //현재 선택된 값을 검색 카테고리로 지정
                 setValue();
+                check=false;
                 mList.clear();
                 getData();
             }
@@ -94,18 +99,24 @@ public class searchFragment extends Fragment {
                 keyword = edtSearch.getText().toString();
                 setValue();
                 mList.clear();
+                check=false;
                 getData();
+
             }
         });
         //스크롤 부분..
         nscrollview.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
-                    offset += limit + 1;
+
+
+                if (check==false &&( scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight())){
+                    edtSearch.clearFocus();
+                    offset += (limit + 1);
                     progressbar.setVisibility(View.VISIBLE);
                     getData();
-                }
+                }else{return;}
+
             }
         });
 
@@ -123,8 +134,6 @@ public class searchFragment extends Fragment {
         MainInterface mainInterface = retrofit.create(MainInterface.class);
         Call<String> call = null;
         Map map = new HashMap();
-//        if (keyword!=null||keyword!="") {}
-        Log.d("카테고리", category + keyword);
         try {
             if (!keyword.equals("")) {
                 map.put("name", keyword);
@@ -136,7 +145,6 @@ public class searchFragment extends Fragment {
             if (!category.equals("")) {
                 if (!category.equals("카테고리전체")) map.put("cat", category);
             }
-            if (category.equals("카테고리전체")) Log.d("erroir", "카테고리 전체 ㅎㅎㅎㅎ");
         } catch (NullPointerException err) {
 
         }
@@ -171,6 +179,7 @@ public class searchFragment extends Fragment {
     }
 
     private void parseResult(JSONArray jsonArray) {
+        int size=mList.size();
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -187,6 +196,9 @@ public class searchFragment extends Fragment {
 
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+            if(size==mList.size()){
+                check=true;
             }
             mAdapter = new RecyclerViewAdapter(mList, getContext());
             mRecyclerView.setAdapter(mAdapter);
